@@ -42,11 +42,11 @@ public class EventHandler {
             secondaryMemory[i] = new Frame();
         }
     }
-    
-    public List<Integer> freeSpace (Process p, List<Integer> memoryFrameAvailability, int type, 
+
+    public List<Integer> freeSpace (int spaceNeeded, List<Integer> memoryFrameAvailability, int type, 
             Queue<Integer> tempQueue) {
         int frameNumber = 0;
-        for (int i = 0; i < p.getPageNumber(); i++) {
+        for (int i = 0; i < spaceNeeded; i++) {
             frameNumber = tempQueue.poll();
             memoryFrameAvailability.add(frameNumber);
             frameAvailability[type]++;
@@ -54,19 +54,19 @@ public class EventHandler {
         return memoryFrameAvailability;
     }
     
-    public void moveToSecondaryMemory (List<Integer> mainMemoryFrameAvailability, Process p) {
+    public void moveToSecondaryMemory (List<Integer> mainMemoryFrameAvailability, Process p, int spaceNeeded) {
         List<Integer> secondaryMemoryFrameAvailability = new ArrayList<Integer>();
         boolean fitsInSecondaryMemory;
         int processID, pageNumber, frameNumber;
-        for (int i = 0; i < 512 && frameAvailability[1] != p.getPageNumber(); i++) {
+        for (int i = 0; i < 512 && frameAvailability[1] != spaceNeeded; i++) {
                 if (secondaryMemory[i].getProcessID() == -1) {
                     frameAvailability[1]++;
                     secondaryMemoryFrameAvailability.add(i);
                 }
         }
-        fitsInSecondaryMemory = (p.getPageNumber() <= frameAvailability[1]);
+        fitsInSecondaryMemory = (spaceNeeded <= frameAvailability[1]);
         if (!fitsInSecondaryMemory) {
-            secondaryMemoryFrameAvailability = freeSpace (p, secondaryMemoryFrameAvailability, 1,
+            secondaryMemoryFrameAvailability = freeSpace (spaceNeeded, secondaryMemoryFrameAvailability, 1,
                     secondaryMemoryQueue);
         }
         for (int i = 0; i < frameAvailability[0]; i++) {
@@ -105,9 +105,9 @@ public class EventHandler {
             
             if (!fitsInMainMemory) {
                 //liberar espacio
-                mainMemoryFrameAvailability = freeSpace(p, mainMemoryFrameAvailability, 0, 
+                mainMemoryFrameAvailability = freeSpace(p.getPageNumber()-frameAvailability[0], mainMemoryFrameAvailability, 0, 
                         mainMemoryQueue);
-                moveToSecondaryMemory(mainMemoryFrameAvailability, p);
+                moveToSecondaryMemory(mainMemoryFrameAvailability, p, p.getPageNumber()-frameAvailability[0]);
             }
             //solo se carga en memoria
             int frameNumber = 0;
@@ -117,9 +117,12 @@ public class EventHandler {
                 frameNumber = mainMemoryFrameAvailability.get(i);
                 mainMemory[frameNumber].setProcessID(p.getId());
                 mainMemory[frameNumber].setPageNumber(pageNumber);
-                System.out.println(frameNumber + " ");
+                System.out.print(frameNumber + "\t \t");
                 pageNumber++;
                 mainMemoryQueue.add(frameNumber);
+                if (i % 5 == 0) {
+                    System.out.println();
+                }
             }
             
             mainMemoryFrameAvailability.clear();
