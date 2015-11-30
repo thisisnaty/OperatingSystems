@@ -40,7 +40,7 @@ class Summary {
         return terminatedProcesses;
     }
     
-    public int pageFaults() {
+    public int getPageFaults() {
         return pageFaults;
     }
     
