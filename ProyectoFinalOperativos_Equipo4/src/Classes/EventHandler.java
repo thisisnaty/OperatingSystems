@@ -24,6 +24,7 @@ public class EventHandler {
     // Arreglo en posicion 0 espacios libres en memoria principal, indice 1 
     // libres en memoria secundaria
     private Integer[] frameAvailability;
+    private Summary report;
     
     public EventHandler() {
         mainMemory = new Frame[256];
@@ -70,6 +71,7 @@ public class EventHandler {
                     secondaryMemoryQueue);
         }
         for (int i = 0; i < frameAvailability[0]; i++) {
+            report.swapsOut++;
             frameNumber = mainMemoryFrameAvailability.get(i);
             processID = mainMemory[frameNumber].getProcessID();
             pageNumber = mainMemory[frameNumber].getPageNumber();
@@ -79,7 +81,8 @@ public class EventHandler {
         }
     }
     
-    public void load (Process p, Summary report) {
+    public void load (Process p, Summary r) {
+        report = r;
         boolean fitsInMainMemory = false;
         frameAvailability[0] = 0;
         frameAvailability[1] = 0;
@@ -114,9 +117,11 @@ public class EventHandler {
             int pageNumber = 0;
             
             for (int i = 0; i < frameAvailability[0]; i++) {
+                report.swapsIn++;
                 frameNumber = mainMemoryFrameAvailability.get(i);
                 mainMemory[frameNumber].setProcessID(p.getId());
                 mainMemory[frameNumber].setPageNumber(pageNumber);
+                
                 System.out.print(frameNumber + "\t \t");
                 pageNumber++;
                 mainMemoryQueue.add(frameNumber);
@@ -161,7 +166,6 @@ public class EventHandler {
     public void removeProcess(int pId, Summary summary,
             LinkedList<Process> lklProcess) {
         System.out.println("Liberar");
-        
         boolean exists = false;     // Variable que guarda si el proceso existe.
         
         // Checa que el proceso exista y obtiene el tiempo de llegada.
@@ -218,6 +222,7 @@ public class EventHandler {
                 }
             }
         }
+        report = summary;
     }
     
     // Método que muestra los datos del summary después de un conjunto de
@@ -251,7 +256,30 @@ public class EventHandler {
     
     public void access(int address, int pID, boolean bitMod, LinkedList<Process>
             processList, Summary summary) {
+        int pageNumber = address/8;
+        boolean pageFound = false;
+        boolean pageFoundInSecondaryM;
+        //checar si esta cargada en mi memoria
+        //pID && pageNumber en algun marco de memoria REAL
+        for(int i = 0; i < 256; i++){
+            if(mainMemory[i].getProcessID() == pID && mainMemory[i].getPageNumber() == pageNumber){
+                System.out.println("Direccion virtual: " + address);
+                System.out.println("Direccion real: " + pageNumber + i*8);
+                pageFound = true;
+            }
+        }
         
+        //si no lo encuentra, buscar en memoria secundaria
+        if(!pageFound){
+            for(int i = 0; i < 512; i++){
+                if(secondaryMemory[i].getProcessID() == pID && secondaryMemory[i].getPageNumber() == pageNumber){
+                    pageFoundInSecondaryM = true;
+                    //Checar si hay espacio libre en la real
+                    //Si si, pasarlo
+                    //Si no, hacer espacio y pasarlo
+                }
+            }
+        }
     }
     
 }
