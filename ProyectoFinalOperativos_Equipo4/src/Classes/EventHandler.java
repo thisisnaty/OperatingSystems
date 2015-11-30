@@ -8,13 +8,18 @@ import java.util.Calendar;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 /**
  *
  * @author Equipo4
  */
 public class EventHandler {
+    // Arreglo de marcos de página en memoria principal.
     private Frame[] mainMemory;
+    // Arreglo de marcos de página en memoria secundaria.
     private Frame[] secondaryMemory;
+    // Queue para manejar FIFO.
+    private Queue<Process> memoryQueue = new LinkedList<Process>();
     
     public EventHandler() {
         mainMemory = new Frame[256];
