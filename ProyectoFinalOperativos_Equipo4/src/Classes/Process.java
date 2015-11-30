@@ -49,7 +49,7 @@ public class Process {
         return 0;
     }
     
-    public Calendar getTerminacion() {
+    public Calendar getEndTime() {
         return endTime;
     }
     
