@@ -88,6 +88,7 @@ public class EventHandler {
         
         if (isLoaded(p)) {
             System.out.println("Este proceso ya está cargado en memoria");
+            System.out.println();
             return;
         }
         else {
@@ -125,6 +126,8 @@ public class EventHandler {
                 }
             }
             
+            System.out.println();
+            
             mainMemoryFrameAvailability.clear();
             System.out.println();
         }
@@ -158,65 +161,95 @@ public class EventHandler {
     // Método removeProcess que libera un proceso de memoria.
     // Recibe de parámetros el processId, el summary y la lista de procesos.
     // El método calcula el turnaround y muestra los marcos liberados.
-    public void removeProcess(int pId, Summary summary,
-            LinkedList<Process> lklProcess) {
-        System.out.println("Liberar");
+    public void removeProcess(int pID, Summary summary,
+        LinkedList<Process> processList) {
+
+        // Validar que proceso existe
+        boolean exists = false;
         
-        boolean exists = false;     // Variable que guarda si el proceso existe.
-        
-        // Checa que el proceso exista y obtiene el tiempo de llegada.
-        for (Process process : lklProcess) {
-            if (process.getId() == pId && process.getTurnaround() == 0) {
+        // Checa que el proceso exista
+        for (Process process : processList) {
+            if (process.getId() == pID && process.getTurnaround() == 0) {
                 exists = true;
             }
         }
         
+        
+        
         // Si el proceso existe, se libera.
         if (exists) {
-            Calendar arrivalTime = null;    // El tiempo de lelgada del proceso.
-            Process p = null;   // El proceso
-            int processIndex = 0;       // El índice del proceso.
+            System.out.println("Liberar Proceso " + pID);
+            
+            // Tiempo de llegada
+            Calendar arrivalTime = null;
+            // Proceso temporal
+            Process p = null;
+            // Index in list
+            int processIndex = 0;
             
             // Saca el tiempo de llegada y el index.
-            for (Process process : lklProcess) {
-                if (process.getId() == pId) {
+            for (Process process : processList) {
+                if (process.getId() == pID) {
                     arrivalTime = process.getArrivalTime();
-                    processIndex = lklProcess.indexOf(process);
+                    // Guardar indice
+                    processIndex = processList.indexOf(process);
                 }
             }
             
-            // Calcular el tiempo actual.
+            // Get actual time
             Calendar terminationTime = Calendar.getInstance();
             terminationTime.getTime();
             
-            // Calcula y guarda el turnaround.
+            // Turnaround calculations
             long turnaround = (terminationTime.getTimeInMillis() -
                     arrivalTime.getTimeInMillis());
-            lklProcess.get(processIndex).setEndTime(terminationTime);
+            
+            processList.get(processIndex).setEndTime(terminationTime);
             summary.updateTerminatedProcesses();
             summary.updateTotalTurnaround(turnaround);
+            processList.get(processIndex).getTurnaround();
             
-            // Revisa las localidades de memoria principal y secundaria y borra
-            // el proceso que tenga el pID
-            System.out.print("Se liberaron los marcos: ");
+            int countP = 0;
+            int countS = 0;
+            
+            // Revisa memorias y borra proceso con pID
+            System.out.println("Se liberaron los marcos de memoria principal: ");
             for (int i = 0; i < 256; i++) {
-                if (mainMemory[i].getProcessID() == pId) {
+                if (mainMemory[i].getProcessID() == pID) {
+                    countP++;
                     mainMemory[i].setProcessID(-1);
-                    System.out.print(i + " ");
+                    System.out.print(i + "\t \t");
+                    if (i % 5 == 0) {
+                        System.out.println();
+                    }
                 }
-                
-                if (secondaryMemory[i].getProcessID() == pId) {
-                    secondaryMemory[i].setProcessID(-1);
-                }
-                
-                System.out.println("que ocupaba el proceso" + pId);
             }
             
-            for (int i = 256; i < 512; i++) {
-                if (secondaryMemory[i].getProcessID() == pId) {
+            if (countP == 0) {
+                System.out.println("Memoria principal no afectada en liberación");
+            }
+            
+            System.out.println();
+            
+            System.out.println("Se liberaron los marcos de memoria secundaria: ");
+            for (int i = 0; i < 512; i++) {
+                if (secondaryMemory[i].getProcessID() == pID) {
+                    countS++;
                     secondaryMemory[i].setProcessID(-1);
+                    System.out.print(i + "\t \t");
+                    if (i % 5 == 0) {
+                        System.out.println();
+                    }
                 }
             }
+            
+            if (countS == 0) {
+                System.out.println("Memoria secundaria no afectada en liberación");
+            }
+            
+             System.out.println();
+             System.out.println("*Que ocupaba el proceso " + pID);
+             System.out.println();
         }
     }
     

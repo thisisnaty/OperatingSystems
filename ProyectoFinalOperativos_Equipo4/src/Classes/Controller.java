@@ -107,7 +107,7 @@ public class Controller {
                                 System.out.println("Instrucción a procesar:");
                                 System.out.println(line);
                                 System.out.println();
-                                createA();
+                                //createA();
                             }
                             break;
                             
@@ -126,7 +126,7 @@ public class Controller {
                             System.out.println("Instrucción a procesar:");
                             System.out.println(line);
                             System.out.println();
-                            createF();
+                            //createF();
                             break;
                             
                         default:

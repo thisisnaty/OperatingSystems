@@ -44,6 +44,7 @@ public class Process {
     public long getTurnaround() {
         if(endTime != null)
         {
+            turnaround = (endTime.getTimeInMillis() - arrivalTime.getTimeInMillis()); 
             return (endTime.getTimeInMillis() - arrivalTime.getTimeInMillis());
         }
         return 0;
