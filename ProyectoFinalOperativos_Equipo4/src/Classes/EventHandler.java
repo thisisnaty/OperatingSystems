@@ -4,11 +4,15 @@
  * and open the template in the editor.
  */
 package Classes;
-
+import java.util.Calendar;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 /**
  *
- * @author pescalante
+ * @author Equipo4
  */
 public class EventHandler {
-    
+    private Frame[] mainMemory;
+    private Frame[] secondaryMemory;
 }

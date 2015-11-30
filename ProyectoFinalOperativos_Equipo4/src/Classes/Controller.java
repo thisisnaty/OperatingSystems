@@ -36,7 +36,7 @@ public class Controller {
     int address;
     // Datos se guardan para resumen del final
     Summary summary;
-    
+
     // Controller constructor
     public Controller(String fName) {
         // Asigna valores default
@@ -50,7 +50,7 @@ public class Controller {
         this.charCommand = '\0';
         this.address = 0;
         
-        this.summary = new Resumen();
+        this.summary = new Summary();
     }
 
     //lee archivo de pruebas, valida inputs
