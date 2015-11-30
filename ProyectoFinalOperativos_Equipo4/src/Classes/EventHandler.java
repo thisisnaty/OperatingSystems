@@ -21,6 +21,8 @@ public class EventHandler {
     // Queue para manejar FIFO.
     private Queue<Integer> mainMemoryQueue;
     private Queue<Integer> secondaryMemoryQueue;
+    // Arreglo en posicion 0 espacios libres en memoria principal, indice 1 
+    // libres en memoria secundaria
     private Integer[] frameAvailability;
     
     public EventHandler() {
@@ -40,6 +42,7 @@ public class EventHandler {
             secondaryMemory[i] = new Frame();
         }
     }
+    
     public List<Integer> freeSpace (Process p, List<Integer> memoryFrameAvailability, int type, 
             Queue<Integer> tempQueue) {
         int frameNumber = 0;
@@ -75,7 +78,6 @@ public class EventHandler {
             secondaryMemoryQueue.add(frameNumber);
         }
     }
-    
     
     public void load (Process p, Summary report) {
         boolean fitsInMainMemory = false;
@@ -149,6 +151,7 @@ public class EventHandler {
         
         return false;
     }
+    
     // Método removeProcess que libera un proceso de memoria.
     // Recibe de parámetros el processId, el summary y la lista de procesos.
     // El método calcula el turnaround y muestra los marcos liberados.
@@ -242,4 +245,10 @@ public class EventHandler {
         System.out.println("Turnaround promedio: " +
                 summary.getAverageTurnaround());
     }
+    
+    public void access(int address, int pID, boolean bitMod, LinkedList<Process>
+            processList, Summary summary) {
+        
+    }
+    
 }
