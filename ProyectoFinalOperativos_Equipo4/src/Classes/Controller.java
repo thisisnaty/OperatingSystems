@@ -1,8 +1,8 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+* To change this license header, choose License Headers in Project Properties.
+* To change this template file, choose Tools | Templates
+* and open the template in the editor.
+*/
 package Classes;
 import java.io.File;
 import java.io.IOException;
@@ -15,11 +15,11 @@ import java.util.Scanner;
  * @author Equipo4
  */
 public class Controller {
-
+    
     // Contiene memorias y hace handling de comandos ACCESAR, AGREGAR, etc.
     EventHandler handler;
     // Contiene procesos como queue
-    LinkedList<Process> processList; 
+    LinkedList<Process> processList;
     
     // Nombre de archivo
     String fileName;
@@ -39,7 +39,7 @@ public class Controller {
     Summary summary;
     // Modified bit
     boolean bitMod;
-
+    
     // Controller constructor
     public Controller(String fName) {
         // Asigna valores default
@@ -55,7 +55,7 @@ public class Controller {
         
         this.summary = new Summary();
     }
-
+    
     //lee archivo de pruebas, valida inputs
     public void leerArchivo() {
         // Variable boleana en pasado
@@ -66,7 +66,7 @@ public class Controller {
         try {
             scan = new Scanner(new File(fileName));
             fileRead = true;
-        } 
+        }
         
         catch (IOException e) {
             System.out.println("Archivo no existe");
@@ -78,68 +78,66 @@ public class Controller {
             line = scan.nextLine();
             line = line.trim();
             
+            if (!line.equals("")) {
+                
+            }
+            
             // Leer archivo hasta que sea E
             while (!line.equals("E")) {
-                // Leer primera palabra
-                commandLine = line.split(" ");
-                charCommand = commandLine[0].charAt(0);
                 
-                switch(charCommand) {
-                    // Agregar proceso
-                    case 'P': 
-                        if(validateP(line)) {
+                if (!line.equals("")) {
+                    // Leer primera palabra
+                    commandLine = line.split(" ");
+                    charCommand = commandLine[0].charAt(0);
+                    
+                    switch(charCommand) {
+                        // Agregar proceso
+                        case 'P':
+                            if(validateP(line)) {
+                                System.out.println("Instrucción a procesar:");
+                                System.out.println(line);
+                                System.out.println();
+                                createP();
+                            }
+                            break;
+                            
+                            // Accesar proceso
+                        case 'A':
+                            if(validateA(line)) {
+                                System.out.println("Instrucción a procesar:");
+                                System.out.println(line);
+                                System.out.println();
+                                createA();
+                            }
+                            break;
+                            
+                            // Liberar proceso
+                        case 'L':
+                            if(validateL(line)) {
+                                System.out.println("Instrucción a procesar:");
+                                System.out.println(line);
+                                System.out.println();
+                                createL();
+                            }
+                            break;
+                            
+                            // Fin de acciones
+                        case 'F':
                             System.out.println("Instrucción a procesar:");
                             System.out.println(line);
                             System.out.println();
-                            createP();
-                        }
-                    break;
-                        
-                    // Accesar proceso    
-                    case 'A': 
-                        if(validateA(line)) {
-                            System.out.println("Instrucción a procesar:");
+                            createF();
+                            break;
+                            
+                        default:
+                            System.out.println("***************************");
+                            System.out.println("Linea de pruebas invalida:");
                             System.out.println(line);
+                            System.out.println("***************************");
                             System.out.println();
-                            createA();
-                        }
-                    break;
-                        
-                    // Liberar proceso
-                    case 'L':
-                        if(validateL(line)) {
-                            System.out.println("Instrucción a procesar:");
-                            System.out.println(line);
-                            System.out.println();
-                            createL();
-                        }
-                    break;
-                        
-                    // Fin de acciones    
-                    case 'F':
-                        System.out.println("Instrucción a procesar:");
-                        System.out.println(line);
-                        System.out.println();
-                        createF();
-                    break;
-                        
-                    // Terminar aplicacion    
-                    case 'E':
-                        System.out.println("Instrucción a procesar:");
-                        System.out.println(line);
-                        System.out.println();
-                        System.out.println("Terminar pruebas");
-                        System.exit(0);
-                    break;
-                        
-                    default:
-                        System.out.println("Instrucción a procesar:");
-                        System.out.println(line);
-                        System.out.println();
-                        System.out.println("Linea de pruebas invalida:");
-                        System.out.println(line);
-                    break;
-                        
+                            break;
+                            
+                    }
                 }
                 
                 // Read new line
@@ -147,11 +145,19 @@ public class Controller {
                 line = line.trim();
             }
             
+            System.out.println("Instrucción a procesar:");
+            System.out.println(line);
+            System.out.println();
+            System.out.println("***************************");
+            System.out.println("Terminar pruebas");
+            System.out.println("***************************");
+            System.exit(0);
+            
             // Finish reading
             scan.close();
         }
     }
-
+    
     // Crea nuevo evento de agregar proceso a memoria
     private void createP() {
         // Se crea proceso
@@ -161,14 +167,17 @@ public class Controller {
         // Se carga a la lista
         processList.add(newProcess);
     }
-
+    
     // Validar file input de P
     private boolean validateP(String line) {
         // Palabras sin espacio, checar sintaxis
         if (line.trim().split("\\s+").length != 3) {
             // Error de sintaxis
+            System.out.println("***************************");
             System.out.println("Error de sintaxis de linea:");
             System.out.println(line);
+            System.out.println("***************************");
+            System.out.println();
             return false;
         }
         
@@ -177,28 +186,39 @@ public class Controller {
             pSize = Integer.parseInt(commandLine[1]);
             // Checar tamaño de letra
             if (pSize > 2048) {
+                System.out.println("******************************************");
                 System.out.println("Tamaño excede espacio en memoria (2048):");
                 System.out.println(commandLine[1]);
+                System.out.println("Error de linea:");
+                System.out.println(line);
+                System.out.println("******************************************");
+                System.out.println();
                 return false;
             }
-        } 
+        }
         
         catch(NumberFormatException e) {
             //se imprime el tipo de error
+            System.out.println("***************************");
             System.out.println("Error de sintaxis de linea:");
             System.out.println(line);
+            System.out.println("***************************");
+            System.out.println();
             return false;
         }
         
         // Checar si palabras son numeros o letras
         try {
             pID = Integer.parseInt(commandLine[2]);
-        } 
+        }
         
         catch(NumberFormatException e) {
             //se imprime el tipo de error
+            System.out.println("***************************");
             System.out.println("Error de sintaxis de linea:");
             System.out.println(line);
+            System.out.println("***************************");
+            System.out.println();
             return false;
         }
         
@@ -217,32 +237,41 @@ public class Controller {
         // Palabras sin espacio, checar sintaxis
         if (line.trim().split("\\s+").length != 4) {
             // Error de sintaxis
+            System.out.println("***************************");
             System.out.println("Error de sintaxis de linea:");
             System.out.println(line);
+            System.out.println("***************************");
+            System.out.println();
             return false;
         }
         
         // Checar si palabras son numeros o letras
         try {
             address = Integer.parseInt(commandLine[1]);
-        } 
+        }
         
         catch(NumberFormatException e) {
             //se imprime el tipo de error
+            System.out.println("***************************");
             System.out.println("Error de sintaxis de linea:");
             System.out.println(line);
+            System.out.println("***************************");
+            System.out.println();
             return false;
         }
         
         // Checar si palabras son numeros o letras
         try {
             pID = Integer.parseInt(commandLine[2]);
-        } 
+        }
         
         catch(NumberFormatException e) {
             //se imprime el tipo de error
+            System.out.println("***************************");
             System.out.println("Error de sintaxis de linea:");
             System.out.println(line);
+            System.out.println("***************************");
+            System.out.println();
             return false;
         }
         
@@ -255,8 +284,11 @@ public class Controller {
                 bitMod = true;
                 break;
             default:
+                System.out.println("***************************");
                 System.out.println("Error de sintaxis de linea:");
                 System.out.println(line);
+                System.out.println("***************************");
+                System.out.println();
                 return false;
         }
         
@@ -275,20 +307,26 @@ public class Controller {
         // Palabras sin espacio, checar sintaxis
         if (line.trim().split("\\s+").length != 2) {
             // Error de sintaxis
+            System.out.println("***************************");
             System.out.println("Error de sintaxis de linea:");
             System.out.println(line);
+            System.out.println("***************************");
+            System.out.println();
             return false;
         }
-
+        
         // Checar si palabras son numeros o letras
         try {
             pID = Integer.parseInt(commandLine[1]);
-        } 
+        }
         
         catch(NumberFormatException e) {
             //se imprime el tipo de error
+            System.out.println("***************************");
             System.out.println("Error de sintaxis de linea:");
             System.out.println(line);
+            System.out.println("***************************");
+            System.out.println();
             return false;
         }
         
