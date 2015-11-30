@@ -299,7 +299,7 @@ public class Controller {
     // Crear nuevo evento de liberar proceso
     private void createL() {
         // Liberar proceso
-        handler.freeSpace(pID, summary, processList);
+        handler.removeProcess(pID, summary, processList);
     }
     
     // Validar file input de L
