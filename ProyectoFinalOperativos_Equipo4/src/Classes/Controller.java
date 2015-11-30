@@ -19,7 +19,7 @@ public class Controller {
     // Contiene memorias y hace handling de comandos ACCESAR, AGREGAR, etc.
     EventHandler handler;
     // Contiene procesos como queue
-    LinkedList<Integer> processList; 
+    LinkedList<Process> processList; 
     
     // Nombre de archivo
     String fileName;
@@ -152,7 +152,12 @@ public class Controller {
 
     // Crea nuevo evento de agregar proceso a memoria
     private void createP() {
-        
+        // Se crea proceso
+        Process newProcess = new Process(pID, pSize);
+        // Se carga al handler
+        handler.load(newProcess, summary);
+        // Se carga a la lista
+        processList.add(newProcess);
     }
 
     private boolean validateP(String line) {
