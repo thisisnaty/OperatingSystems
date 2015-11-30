@@ -15,4 +15,8 @@ import java.util.List;
 public class EventHandler {
     private Frame[] mainMemory;
     private Frame[] secondaryMemory;
+    
+    public EventHandler( ) {
+        
+    }
 }

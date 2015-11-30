@@ -23,12 +23,7 @@ public class ProyectoFinalOperativos_Equipo4 {
         
         // Lee archivo de prueba
         Controller control = new Controller("Archivo.txt");
-        try {
-            control.leerArchivo();
-        } catch (IOException ex) {
-            Logger.getLogger(ProyectoFinalOperativos_Equipo4.class.getName()).
-                    log(Level.SEVERE, null, ex);
-        }
+        control.leerArchivo();
     }
     
 }
