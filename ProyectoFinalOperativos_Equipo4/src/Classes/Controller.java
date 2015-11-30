@@ -33,7 +33,7 @@ public class Controller {
     // Direccion asignada al proceso
     int direccion;
     // Datos se guardan para resumen del final
-    Resumen resumen;
+    Summary resumen;
     
     public Controller(String fName) {
         // Asigna valores default
@@ -47,7 +47,7 @@ public class Controller {
         this.charComando = '\0';
         this.direccion = 0;
         
-        this.resumen = new Resumen();
+        this.resumen = new Summary();
     }
 
     public void leerArchivo() {
