@@ -35,6 +35,4 @@ public class Pagina {
     public void setBitResidencia(boolean bitResidencia) {
         this.bitResidencia = bitResidencia;
     }
-    
-
 }
