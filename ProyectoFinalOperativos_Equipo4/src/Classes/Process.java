@@ -69,7 +69,7 @@ public class Process {
         return arrPages;
     }
     
-    public Calendar getTiempoLlegada() {
+    public Calendar getArrivalTime() {
         return arrivalTime;
     }
     
@@ -78,7 +78,7 @@ public class Process {
         this.pageNumber = pageNumber;
     }
     
-    public void setTerminacion(Calendar endTime) {
+    public void setEndTime(Calendar endTime) {
         this.endTime = endTime;
     }         
     

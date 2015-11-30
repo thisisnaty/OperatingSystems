@@ -16,7 +16,17 @@ public class EventHandler {
     private Frame[] mainMemory;
     private Frame[] secondaryMemory;
     
-    public EventHandler( ) {
+    public EventHandler() {
+        mainMemory = new Frame[256];
+        secondaryMemory = new Frame[512];
         
+        for (int i = 0; i < 256; i++) {
+            mainMemory[i] = new Frame();
+            secondaryMemory[i] = new Frame();
+        }
+        
+        for (int i = 256; i < 512; i++) {
+            secondaryMemory[i] = new Frame();
+        }
     }
 }
