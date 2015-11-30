@@ -1,8 +1,8 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+* To change this license header, choose License Headers in Project Properties.
+* To change this template file, choose Tools | Templates
+* and open the template in the editor.
+*/
 package Classes;
 import java.util.Calendar;
 import java.util.ArrayList;
@@ -19,12 +19,18 @@ public class EventHandler {
     // Arreglo de marcos de página en memoria secundaria.
     private Frame[] secondaryMemory;
     // Queue para manejar FIFO.
-    private Queue<Process> memoryQueue = new LinkedList<Process>();
+    private Queue<Integer> mainMemoryQueue;
+    private Queue<Integer> secondaryMemoryQueue;
+    private Integer[] frameAvailability;
     
     public EventHandler() {
         mainMemory = new Frame[256];
         secondaryMemory = new Frame[512];
-        
+        mainMemoryQueue = new LinkedList<Integer>();
+        secondaryMemoryQueue = new LinkedList<Integer>();
+        frameAvailability = new Integer[2];
+        frameAvailability[0] = 0;
+        frameAvailability[1] = 0;
         for (int i = 0; i < 256; i++) {
             mainMemory[i] = new Frame();
             secondaryMemory[i] = new Frame();
@@ -34,57 +40,91 @@ public class EventHandler {
             secondaryMemory[i] = new Frame();
         }
     }
-    public void freeSpace (Process p, List<Integer> mainMemoryFrameAvailability, List<Integer> 
-            secondaryMemoryFrameAvailability) {
-        
+    public List<Integer> freeSpace (Process p, List<Integer> memoryFrameAvailability, int type, 
+            Queue<Integer> tempQueue) {
+        int frameNumber = 0;
+        for (int i = 0; i < p.getPageNumber(); i++) {
+            frameNumber = tempQueue.poll();
+            memoryFrameAvailability.add(frameNumber);
+            frameAvailability[type]++;
+        }
+        return memoryFrameAvailability;
     }
     
-    public void removeFrame(Frame f) {
-        
+    public void moveToSecondaryMemory (List<Integer> mainMemoryFrameAvailability, Process p) {
+        List<Integer> secondaryMemoryFrameAvailability = new ArrayList<Integer>();
+        boolean fitsInSecondaryMemory;
+        int processID, pageNumber, frameNumber;
+        for (int i = 0; i < 512 && frameAvailability[1] != p.getPageNumber(); i++) {
+                if (secondaryMemory[i].getProcessID() == -1) {
+                    frameAvailability[1]++;
+                    secondaryMemoryFrameAvailability.add(i);
+                }
+        }
+        fitsInSecondaryMemory = (p.getPageNumber() <= frameAvailability[1]);
+        if (!fitsInSecondaryMemory) {
+            secondaryMemoryFrameAvailability = freeSpace (p, secondaryMemoryFrameAvailability, 1,
+                    secondaryMemoryQueue);
+        }
+        for (int i = 0; i < frameAvailability[0]; i++) {
+            frameNumber = mainMemoryFrameAvailability.get(i);
+            processID = mainMemory[frameNumber].getProcessID();
+            pageNumber = mainMemory[frameNumber].getPageNumber();
+            secondaryMemory[frameNumber].setProcessID(processID);
+            secondaryMemory[frameNumber].setPageNumber(pageNumber);
+            secondaryMemoryQueue.add(frameNumber);
+        }
     }
+    
+    
     public void load (Process p, Summary report) {
         boolean fitsInMainMemory = false;
-        int frameAvailability = 0; 
-        List<Integer> mainMemoryFrameAvailability = new ArrayList<Integer>();
-        List<Integer> secondaryMemoryFrameAvailability = new ArrayList<Integer>();
+        frameAvailability[0] = 0;
+        frameAvailability[1] = 0;
+        
+        List<Integer> mainMemoryFrameAvailability = new ArrayList<>();
         
         if (isLoaded(p)) {
             System.out.println("Este proceso ya está cargado en memoria");
+            return;
         }
         else {
-            //cargarlo en memoria
-            for (int i = 0; i < 256 && frameAvailability != p.getPageNumber(); i++) {
+            //guardar los marcos libres
+            for (int i = 0; i < 256 && frameAvailability[0] != p.getPageNumber(); i++) {
                 if (mainMemory[i].getProcessID() == -1) {
-                    frameAvailability++;
+                    frameAvailability[0]++;
                     mainMemoryFrameAvailability.add(i);
                 }
             }
             
             System.out.println("Se usaron los siguientes marcos de página: ");
             
-            fitsInMainMemory = (p.getPageNumber() <= frameAvailability);
-                        
+            fitsInMainMemory = (p.getPageNumber() <= frameAvailability[0]);
+            
             if (!fitsInMainMemory) {
                 //liberar espacio
-                
+                mainMemoryFrameAvailability = freeSpace(p, mainMemoryFrameAvailability, 0, 
+                        mainMemoryQueue);
+                moveToSecondaryMemory(mainMemoryFrameAvailability, p);
             }
             //solo se carga en memoria
-                int frameNumber = 0;
-                int pageNumber = 0;
-                
-                for (int i = 0; i < frameAvailability; i++) {
-                    frameNumber = mainMemoryFrameAvailability.get(i);
-                    mainMemory[frameNumber].setProcessID(p.getId());
-                    mainMemory[frameNumber].setPageNumber(pageNumber);
-                    System.out.println(frameNumber + " ");
-                    pageNumber++;
-                }
-                
-                mainMemoryFrameAvailability.clear();
-                System.out.println();
+            int frameNumber = 0;
+            int pageNumber = 0;
+            
+            for (int i = 0; i < frameAvailability[0]; i++) {
+                frameNumber = mainMemoryFrameAvailability.get(i);
+                mainMemory[frameNumber].setProcessID(p.getId());
+                mainMemory[frameNumber].setPageNumber(pageNumber);
+                System.out.println(frameNumber + " ");
+                pageNumber++;
+                mainMemoryQueue.add(frameNumber);
+            }
+            
+            mainMemoryFrameAvailability.clear();
+            System.out.println();
         }
     }
-        
+    
     public boolean isLoaded (Process p) {
         
         int pageNum = p.getSize()/8;
@@ -94,10 +134,8 @@ public class EventHandler {
         
         p.setPageNumber(pageNum);
         
-        boolean isLoaded = false;
-        
         for (int i = 0; i < 256; i++) {
-            if (mainMemory[i].getProcessID() == p.getId() || 
+            if (mainMemory[i].getProcessID() == p.getId() ||
                     secondaryMemory[i].getProcessID() == p.getId()) {
                 return true;
             }
@@ -114,7 +152,7 @@ public class EventHandler {
     // Método removeProcess que libera un proceso de memoria.
     // Recibe de parámetros el processId, el summary y la lista de procesos.
     // El método calcula el turnaround y muestra los marcos liberados.
-    public void removeProcess(int pId, Summary summary, 
+    public void removeProcess(int pId, Summary summary,
             LinkedList<Process> lklProcess) {
         System.out.println("Liberar");
         
@@ -139,14 +177,14 @@ public class EventHandler {
                     arrivalTime = process.getArrivalTime();
                     processIndex = lklProcess.indexOf(process);
                 }
-            }            
+            }
             
             // Calcular el tiempo actual.
             Calendar terminationTime = Calendar.getInstance();
             terminationTime.getTime();
             
             // Calcula y guarda el turnaround.
-            long turnaround = (terminationTime.getTimeInMillis() - 
+            long turnaround = (terminationTime.getTimeInMillis() -
                     arrivalTime.getTimeInMillis());
             lklProcess.get(processIndex).setEndTime(terminationTime);
             summary.updateTerminatedProcesses();
@@ -165,14 +203,14 @@ public class EventHandler {
                     secondaryMemory[i].setProcessID(-1);
                 }
                 
-                System.out.println("que ocupaba el proceso" + pId);  
+                System.out.println("que ocupaba el proceso" + pId);
             }
             
             for (int i = 256; i < 512; i++) {
                 if (secondaryMemory[i].getProcessID() == pId) {
                     secondaryMemory[i].setProcessID(-1);
                 }
-            } 
+            }
         }
     }
     
@@ -195,13 +233,13 @@ public class EventHandler {
                 System.out.println("Turnaround del proceso " + process.getId() +
                         " = " + process.getTurnaround() + "ms");
             }
-        }   
-        System.out.println("Procesos terminados: " + 
+        }
+        System.out.println("Procesos terminados: " +
                 summary.getTerminatedProcesses());
         System.out.println("Page faults: "+ summary.getPageFaults());
         System.out.println("Swap ins: " + summary.getSwapsIn());
         System.out.println("Swap outs: "+ summary.getSwapsOut());
-        System.out.println("Turnaround promedio: " + 
+        System.out.println("Turnaround promedio: " +
                 summary.getAverageTurnaround());
     }
 }
