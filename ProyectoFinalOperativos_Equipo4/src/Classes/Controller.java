@@ -37,6 +37,8 @@ public class Controller {
     int address;
     // Datos se guardan para resumen del final
     Summary summary;
+    // Modified bit
+    boolean bitMod;
 
     // Controller constructor
     public Controller(String fName) {
@@ -160,6 +162,7 @@ public class Controller {
         processList.add(newProcess);
     }
 
+    // Validar file input de P
     private boolean validateP(String line) {
         // Palabras sin espacio, checar sintaxis
         if (line.trim().split("\\s+").length != 3) {
@@ -203,24 +206,103 @@ public class Controller {
         return true;
     }
     
+    // Crear nuevo evento de accesar datos
     private void createA() {
-
+        // Accesar proceso
+        // handler.access(address, pID, bitMod, processList, summary);
     }
     
+    // Validar file input de A
     private boolean validateA(String line) {
+        // Palabras sin espacio, checar sintaxis
+        if (line.trim().split("\\s+").length != 4) {
+            // Error de sintaxis
+            System.out.println("Error de sintaxis de linea:");
+            System.out.println(line);
+            return false;
+        }
+        
+        // Checar si palabras son numeros o letras
+        try {
+            address = Integer.parseInt(commandLine[1]);
+        } 
+        
+        catch(NumberFormatException e) {
+            //se imprime el tipo de error
+            System.out.println("Error de sintaxis de linea:");
+            System.out.println(line);
+            return false;
+        }
+        
+        // Checar si palabras son numeros o letras
+        try {
+            pID = Integer.parseInt(commandLine[2]);
+        } 
+        
+        catch(NumberFormatException e) {
+            //se imprime el tipo de error
+            System.out.println("Error de sintaxis de linea:");
+            System.out.println(line);
+            return false;
+        }
+        
+        // Validate bit
+        switch (commandLine[3]) {
+            case "0":
+                bitMod = false;
+                break;
+            case "1":
+                bitMod = true;
+                break;
+            default:
+                System.out.println("Error de sintaxis de linea:");
+                System.out.println(line);
+                return false;
+        }
+        
+        // Bulletproof input
         return true;
     }
     
+    // Crear nuevo evento de liberar proceso
     private void createL() {
-
+        // Liberar proceso
+        handler.freeSpace(pID, summary, processList);
     }
     
+    // Validar file input de L
     private boolean validateL(String line) {
+        // Palabras sin espacio, checar sintaxis
+        if (line.trim().split("\\s+").length != 2) {
+            // Error de sintaxis
+            System.out.println("Error de sintaxis de linea:");
+            System.out.println(line);
+            return false;
+        }
+
+        // Checar si palabras son numeros o letras
+        try {
+            pID = Integer.parseInt(commandLine[1]);
+        } 
+        
+        catch(NumberFormatException e) {
+            //se imprime el tipo de error
+            System.out.println("Error de sintaxis de linea:");
+            System.out.println(line);
+            return false;
+        }
+        
         return true;
     }
     
+    // Nuevo evento de Fin de lectura de datos agrupados
     private void createF() {
-
+        // Finish
+        handler.end(processList, summary);
+        // Reinicia variables
+        summary = new Summary();
+        handler = new EventHandler();
+        processList = new LinkedList();
     }
     
 }
