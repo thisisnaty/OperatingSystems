@@ -6,7 +6,8 @@
 package Classes;
 
 /**
- * Clase Pagina, guarda la información de una página.
+ * Pagina
+ * Clase <code>Pagina</code>, guarda la información de una página.
  * @author Equipo4
  */
 public class Pagina {

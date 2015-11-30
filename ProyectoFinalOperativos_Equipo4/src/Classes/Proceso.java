@@ -8,7 +8,9 @@ package Classes;
 import java.util.Calendar;
 
 /**
- *
+ * Proceso
+ * La clase <code>Proceso</code> guarda toda la información de un proceso, es un
+ * simulador de una PCB.
  * @author Equipo4
  */
 public class Proceso {
