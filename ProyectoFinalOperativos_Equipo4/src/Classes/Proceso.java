@@ -18,7 +18,7 @@ public class Proceso {
     private int numPaginas;     // Número de páginas que ocupa el proceso.
     private int tamaño;     // Tamaño del proceso.
     // Arreglo de las páginas ocupadas por el proceso.
-    private Pagina[] arrPaginas;    
+    private Page[] arrPaginas;    
     private Calendar tiempoLlegada;     // Tiempo de llegada del proceso.
     private long turnaround;    // Tiempo de turnaround del proceso.
     private Calendar tiempoTerminacion; // Tiempo de terminación del proceso.
@@ -32,7 +32,7 @@ public class Proceso {
         else {
             this.numPaginas = tamaño/8;
         }
-        this.arrPaginas = new Pagina[numPaginas];
+        this.arrPaginas = new Page[numPaginas];
         this.tiempoLlegada = Calendar.getInstance();
         this.tiempoLlegada.getTime();
         this.turnaround = 0;
@@ -65,7 +65,7 @@ public class Proceso {
         return tamaño;
     }
     
-    public Pagina[] getArrPaginas() {
+    public Page[] getArrPaginas() {
         return arrPaginas;
     }
     
