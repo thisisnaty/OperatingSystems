@@ -34,8 +34,15 @@ public class EventHandler {
             secondaryMemory[i] = new Frame();
         }
     }
+    public void freeSpace (Process p, List<Integer> mainMemoryFrameAvailability, List<Integer> 
+            secondaryMemoryFrameAvailability) {
+        
+    }
     
-    public void load(Process p, Summary report) {
+    public void removeFrame(Frame f) {
+        
+    }
+    public void load (Process p, Summary report) {
         boolean fitsInMainMemory = false;
         int frameAvailability = 0; 
         List<Integer> mainMemoryFrameAvailability = new ArrayList<Integer>();
@@ -58,7 +65,7 @@ public class EventHandler {
             fitsInMainMemory = (p.getPageNumber() <= frameAvailability);
                         
             if (!fitsInMainMemory) {
-                //swap usando FIFO
+                //liberar espacio
                 
             }
             //solo se carga en memoria
@@ -104,10 +111,10 @@ public class EventHandler {
         
         return false;
     }
-    // Método freeSpace que librea un proceso de memoria.
+    // Método removeProcess que libera un proceso de memoria.
     // Recibe de parámetros el processId, el summary y la lista de procesos.
     // El método calcula el turnaround y muestra los marcos liberados.
-    public void freeSpace(int pId, Summary summary, 
+    public void removeProcess(int pId, Summary summary, 
             LinkedList<Process> lklProcess) {
         System.out.println("Liberar");
         
