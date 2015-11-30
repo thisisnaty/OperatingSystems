@@ -6,33 +6,33 @@
 package Classes;
 
 /**
- * Pagina
- * Clase <code>Pagina</code>, guarda la información de una página.
- * @author Equipo4
+ * Page
+ * Class <code>Page</code>, stores page information
+ * @author Team4
  */
-public class Pagina {
-    private int marco;  // El número de marco en donde se encuentra la página.
-    private boolean bitResidencia; // El bit de residencia.
+public class Page {
+    private int frame;  // El número de frame en donde se encuentra la página.
+    private boolean residenceBit; // El bit de residencia.
     
-    public Pagina() {
-        bitResidencia = false;
+    public Page() {
+        residenceBit = false;
     }
     
     // Métodos para accesar la información de la página.
-    public int getMarco() {
-        return marco;
+    public int getFrame() {
+        return frame;
     }
 
-    public boolean getBitResidencia() {
-        return bitResidencia;
+    public boolean getResidenceBit() {
+        return residenceBit;
     }
     
     // Métodos para modificar la información de la página.
-    public void setMarco(int marco) {
-        this.marco = marco;
+    public void setFrame(int frame) {
+        this.frame = frame;
     }
         
-    public void setBitResidencia(boolean bitResidencia) {
-        this.bitResidencia = bitResidencia;
+    public void setResidenceBit(boolean residenceBit) {
+        this.residenceBit = residenceBit;
     }
 }
