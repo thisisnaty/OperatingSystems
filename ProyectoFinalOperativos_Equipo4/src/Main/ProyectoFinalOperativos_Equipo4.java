@@ -20,7 +20,7 @@ public class ProyectoFinalOperativos_Equipo4 {
         
         //Lee archivo de prueba
         Controller control = new Controller("Archivo.txt");
-        control.leer();
+        control.leerArchivo();
     }
     
 }

@@ -7,8 +7,16 @@ package Classes;
 
 /**
  *
- * @author pescalante
+ * @author Equipo4
  */
 public class Controller {
+
+    public Controller(String archivotxt) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public void leerArchivo() {
+        throw new UnsupportedOperationException("Not supported yet."); 
+    }
     
 }
