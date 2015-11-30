@@ -17,19 +17,23 @@ public class Pagina {
         bitResidencia = false;
     }
     
-    public void setMarco(int marco) {
-        this.marco = marco;
-    }
-    
+    // Métodos para accesar la información de la página.
     public int getMarco() {
         return marco;
     }
+
+    public boolean getBitResidencia() {
+        return bitResidencia;
+    }
     
+    // Métodos para modificar la información de la página.
+    public void setMarco(int marco) {
+        this.marco = marco;
+    }
+        
     public void setBitResidencia(boolean bitResidencia) {
         this.bitResidencia = bitResidencia;
     }
     
-    public boolean getBitResidencia() {
-        return bitResidencia;
-    }
+
 }
