@@ -5,9 +5,6 @@
  */
 package Main;
 import Classes.*;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -21,14 +18,9 @@ public class ProyectoFinalOperativos_Equipo4 {
     public static void main(String[] args) {
         // TODO code application logic here
         
-        // Lee archivo de prueba
+        //Lee archivo de prueba
         Controller control = new Controller("Archivo.txt");
-        try {
-            control.leerArchivo();
-        } catch (IOException ex) {
-            Logger.getLogger(ProyectoFinalOperativos_Equipo4.class.getName()).
-                    log(Level.SEVERE, null, ex);
-        }
+        control.leerArchivo();
     }
     
 }
