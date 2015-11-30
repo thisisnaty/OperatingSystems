@@ -3,11 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package proyectofinaloperativos_equipo4;
+package Main;
+import Classes.*;
 
 /**
  *
- * @author pescalante
+ * @author Equipo4
  */
 public class ProyectoFinalOperativos_Equipo4 {
 
@@ -16,6 +17,10 @@ public class ProyectoFinalOperativos_Equipo4 {
      */
     public static void main(String[] args) {
         // TODO code application logic here
+        
+        //Lee archivo de prueba
+        Controller control = new Controller("Archivo.txt");
+        control.leer();
     }
     
 }
