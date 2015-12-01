@@ -126,7 +126,7 @@ public class Controller {
                             System.out.println("Instrucción a procesar:");
                             System.out.println(line);
                             System.out.println();
-                            //createF();
+                            createF();
                             break;
                             
                         default:
@@ -163,9 +163,10 @@ public class Controller {
         // Se crea proceso
         Process newProcess = new Process(pID, pSize);
         // Se carga al handler
-        handler.load(newProcess, summary);
-        // Se carga a la lista
-        processList.add(newProcess);
+        if(handler.load(newProcess, summary)) {
+            // Se carga a la lista
+            processList.add(newProcess);
+        }
     }
     
     // Validar file input de P
