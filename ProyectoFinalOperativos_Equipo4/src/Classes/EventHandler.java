@@ -25,8 +25,12 @@ public class EventHandler {
     // libres en memoria secundaria
     private Integer[] frameAvailability;
     private Summary report;
+    private List<Integer> mainMemoryFrameAvailability;
+    private List<Integer> secondaryMemoryFrameAvailability;
     
     public EventHandler() {
+        secondaryMemoryFrameAvailability = new ArrayList<Integer>();
+        mainMemoryFrameAvailability = new ArrayList<Integer>();
         mainMemory = new Frame[256];
         secondaryMemory = new Frame[512];
         mainMemoryQueue = new LinkedList<Integer>();
@@ -55,22 +59,33 @@ public class EventHandler {
         return memoryFrameAvailability;
     }
     
-    public void moveToSecondaryMemory (List<Integer> mainMemoryFrameAvailability, Process p, int spaceNeeded) {
-        List<Integer> secondaryMemoryFrameAvailability = new ArrayList<Integer>();
-        boolean fitsInSecondaryMemory;
-        int processID, pageNumber, frameNumber;
-        for (int i = 0; i < 512 && frameAvailability[1] != spaceNeeded; i++) {
-                if (secondaryMemory[i].getProcessID() == -1) {
-                    frameAvailability[1]++;
-                    secondaryMemoryFrameAvailability.add(i);
+    public boolean hasEnoughSpace (int spaceNeeded, int type, List<Integer> memoryFrameAvailability, 
+            Frame[] frameArray) {
+        int max;
+        if (type == 0) {
+            max = 256;
+        }
+        else {
+            max = 512;
+        }
+        for (int i = 0; i < max && frameAvailability[1] != spaceNeeded; i++) {
+                if (frameArray[i].getProcessID() == -1) {
+                    frameAvailability[type]++;
+                    memoryFrameAvailability.add(i);
                 }
         }
-        fitsInSecondaryMemory = (spaceNeeded <= frameAvailability[1]);
-        if (!fitsInSecondaryMemory) {
-            secondaryMemoryFrameAvailability = freeSpace (spaceNeeded, secondaryMemoryFrameAvailability, 1,
+        return (spaceNeeded <= frameAvailability[type]);
+    }
+    
+    public void moveToSecondaryMemory (List<Integer> mainMemoryFrameAvailability, Process p, 
+            int spaceNeeded) {
+        int processID, pageNumber, frameNumber;
+        if (!hasEnoughSpace(spaceNeeded, 1, secondaryMemoryFrameAvailability, secondaryMemory)) {
+            secondaryMemoryFrameAvailability = freeSpace (spaceNeeded, 
+                    secondaryMemoryFrameAvailability, 1,
                     secondaryMemoryQueue);
         }
-        for (int i = 0; i < frameAvailability[0]; i++) {
+        for (int i = 0; i < spaceNeeded; i++) {
             report.swapsOut++;
             frameNumber = mainMemoryFrameAvailability.get(i);
             processID = mainMemory[frameNumber].getProcessID();
@@ -86,37 +101,29 @@ public class EventHandler {
         boolean fitsInMainMemory = false;
         frameAvailability[0] = 0;
         frameAvailability[1] = 0;
+        int pageNum = p.getSize()/8;
+        if (p.getSize() % 8 != 0) {
+            pageNum++;
+        }
+        p.setPageNumber(pageNum);
         
-        List<Integer> mainMemoryFrameAvailability = new ArrayList<>();
-        
-        if (isLoaded(p)) {
+        if (isLoaded(p.getId())) {
             System.out.println("Este proceso ya está cargado en memoria");
             System.out.println();
             return false;
         }
-        else {
-            //guardar los marcos libres
-            for (int i = 0; i < 256 && frameAvailability[0] != p.getPageNumber(); i++) {
-                if (mainMemory[i].getProcessID() == -1) {
-                    frameAvailability[0]++;
-                    mainMemoryFrameAvailability.add(i);
-                }
-            }
-            
-            System.out.println("Se usaron los siguientes marcos de página: ");
-            
-            fitsInMainMemory = (p.getPageNumber() <= frameAvailability[0]);
-            
-            if (!fitsInMainMemory) {
+        else {            
+            if (!hasEnoughSpace (p.getPageNumber(), 0, mainMemoryFrameAvailability, 
+            mainMemory)) {
                 //liberar espacio
-                mainMemoryFrameAvailability = freeSpace(p.getPageNumber()-frameAvailability[0], mainMemoryFrameAvailability, 0, 
-                        mainMemoryQueue);
+                mainMemoryFrameAvailability = freeSpace(p.getPageNumber()-frameAvailability[0], 
+                        mainMemoryFrameAvailability, 0, mainMemoryQueue);
                 moveToSecondaryMemory(mainMemoryFrameAvailability, p, p.getPageNumber()-frameAvailability[0]);
             }
             //solo se carga en memoria
             int frameNumber = 0;
             int pageNumber = 0;
-            
+            System.out.println("Se usaron los siguientes marcos de página: ");
             for (int i = 0; i < frameAvailability[0]; i++) {
                 report.swapsIn++;
                 frameNumber = mainMemoryFrameAvailability.get(i);
@@ -139,24 +146,16 @@ public class EventHandler {
         return true;
     }
     
-    public boolean isLoaded (Process p) {
-        
-        int pageNum = p.getSize()/8;
-        if (p.getSize() % 8 != 0) {
-            pageNum++;
-        }
-        
-        p.setPageNumber(pageNum);
-        
+    public boolean isLoaded (int pID) {
         for (int i = 0; i < 256; i++) {
-            if (mainMemory[i].getProcessID() == p.getId() ||
-                    secondaryMemory[i].getProcessID() == p.getId()) {
+            if (mainMemory[i].getProcessID() == pID ||
+                    secondaryMemory[i].getProcessID() == pID) {
                 return true;
             }
         }
         
         for (int i = 256; i < 512; i++) {
-            if (secondaryMemory[i].getProcessID() == p.getId()) {
+            if (secondaryMemory[i].getProcessID() == pID) {
                 return true;
             }
         }
@@ -286,9 +285,13 @@ public class EventHandler {
                 summary.getAverageTurnaround());
     }
     
-    public void access(int address, int pID, boolean bitMod, LinkedList<Process>
+    public boolean access(int address, int pID, boolean bitMod, LinkedList<Process>
             processList, Summary summary) {
         int pageNumber = address/8;
+        
+        if (!isLoaded(pID)) {
+            return false;
+        }
         boolean pageFound = false;
         boolean pageFoundInSecondaryM;
         //checar si esta cargada en mi memoria
@@ -307,9 +310,15 @@ public class EventHandler {
                 if(secondaryMemory[i].getProcessID() == pID && secondaryMemory[i].getPageNumber() == pageNumber){
                     pageFoundInSecondaryM = true;
                     //Checar si hay espacio libre en la real
-                    //Si si, pasarlo
-                    List<Integer
-                    moveToSecondaryMemory(null, null, 1);
+                    if (hasEnoughSpace(1, 0, mainMemoryFrameAvailability, mainMemory)) {
+                        //Si si, pasarlo
+                        List<Integer> tmp = new ArrayList<Integer>();
+                        tmp.add(i);
+                        
+                    }
+                    
+                    
+                    moveToSecondaryMemory(tmp, null, 1);
                     (List<Integer> mainMemoryFrameAvailability, Process p, int spaceNeeded)
                     //Si no, hacer espacio y pasarlo
                 }
