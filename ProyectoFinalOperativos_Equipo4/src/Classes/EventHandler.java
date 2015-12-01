@@ -344,13 +344,14 @@ public class EventHandler {
             System.out.println("******************************************");
             System.out.println("Se usaron los siguientes marcos de página: ");
             
-            int tmp = frameAvailability[0];
+           
             
             if (!hasEnoughSpace (p.getPageNumber(), 0, mainMemory)) {
+                int tmp = frameAvailability[0];
                 //liberar espacio
                 mainMemoryFrameAvailability = freeSpace(p.getPageNumber()-frameAvailability[0],
                         mainMemoryFrameAvailability, 0, mainMemoryQueue);
-                moveToSecondaryMemory(p, p.getPageNumber()-frameAvailability[0]);
+                moveToSecondaryMemory(p, p.getPageNumber()-tmp);
             }
             
             //solo se carga en memoria
