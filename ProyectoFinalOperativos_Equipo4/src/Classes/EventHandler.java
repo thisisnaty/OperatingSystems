@@ -52,7 +52,7 @@ public class EventHandler {
         int processID, pageNumber, frameNumber;
         if (!hasEnoughSpace(spaceToMove, 1, secondaryMemory)) {
             //si no hay espacio, hace espacio con freeSpace
-            secondaryMemoryFrameAvailability = freeSpace (spaceToMove,
+            freeSpace (spaceToMove,
                     secondaryMemoryFrameAvailability, 1,
                     secondaryMemoryQueue);
         }
@@ -302,7 +302,7 @@ public class EventHandler {
         
         return false;
     }
-    public LinkedList<Integer> freeSpace (int spaceNeeded, LinkedList<Integer> memoryFrameAvailability, int type,
+    public void freeSpace (int spaceNeeded, LinkedList<Integer> memoryFrameAvailability, int type,
             Queue<Integer> tempQueue) {
         int frameNumber = 0;
         for (int i = 0; i < spaceNeeded; i++) {
@@ -316,7 +316,6 @@ public class EventHandler {
         else {
             secondaryMemoryFrameAvailability = memoryFrameAvailability;
         }
-        return memoryFrameAvailability;
     }
     public boolean load (Process p, Summary r) {
         report = r;
@@ -343,13 +342,11 @@ public class EventHandler {
             
             System.out.println("******************************************");
             System.out.println("Se usaron los siguientes marcos de página: ");
-            
-           
-            
+
             if (!hasEnoughSpace (p.getPageNumber(), 0, mainMemory)) {
                 int tmp = frameAvailability[0];
                 //liberar espacio
-                mainMemoryFrameAvailability = freeSpace(p.getPageNumber()-frameAvailability[0],
+                freeSpace(p.getPageNumber()-frameAvailability[0],
                         mainMemoryFrameAvailability, 0, mainMemoryQueue);
                 moveToSecondaryMemory(p, p.getPageNumber()-tmp);
             }
@@ -357,7 +354,6 @@ public class EventHandler {
             //solo se carga en memoria
             int frameNumber = 0;
             int pageNumber = 0;
-            System.out.println("Se usaron los siguientes marcos de página: ");
             for (int i = 0; i < frameAvailability[0]; i++) {
                 report.swapsIn++;
                 frameNumber = mainMemoryFrameAvailability.get(i);
