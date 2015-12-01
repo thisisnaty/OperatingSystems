@@ -90,6 +90,7 @@ public class EventHandler {
         
         List<Integer> mainMemoryFrameAvailability = new ArrayList<>();
         
+        // Checa si el proceso ya existe
         if (isLoaded(p)) {
             System.out.println("******************************************");
             System.out.println("Este proceso ya está cargado en memoria");
@@ -146,6 +147,7 @@ public class EventHandler {
         return true;
     }
     
+    // Checa si hay un proceso cargado en memoria
     public boolean isLoaded (Process p) {
         
         int pageNum = p.getSize()/8;

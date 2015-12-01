@@ -20,7 +20,7 @@ public class ProyectoFinalOperativos_Equipo4 {
         // TODO code application logic here
         
         //Lee archivo de prueba
-        Controller control = new Controller("Pruebas1.txt");
+        Controller control = new Controller("Pruebas2.txt");
         control.leerArchivo();
     }
     
