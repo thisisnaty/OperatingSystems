@@ -19,8 +19,8 @@ public class EventHandler {
     // Arreglo de marcos de página en memoria secundaria.
     private Frame[] secondaryMemory;
     // Queue para manejar FIFO.
-    private Queue<Integer> mainMemoryQueue;
-    private Queue<Integer> secondaryMemoryQueue;
+    private LinkedList<Integer> mainMemoryQueue;
+    private LinkedList<Integer> secondaryMemoryQueue;
     // Arreglo en posicion 0 espacios libres en memoria principal, indice 1 
     // libres en memoria secundaria
     private Integer[] frameAvailability;
@@ -44,6 +44,7 @@ public class EventHandler {
         }
     }
 
+    
     public List<Integer> freeSpace (int spaceNeeded, List<Integer> memoryFrameAvailability, int type, 
             Queue<Integer> tempQueue) {
         int frameNumber = 0;
@@ -59,7 +60,7 @@ public class EventHandler {
         List<Integer> secondaryMemoryFrameAvailability = new ArrayList<Integer>();
         boolean fitsInSecondaryMemory;
         int processID, pageNumber, frameNumber;
-        for (int i = 0; i < 512 && frameAvailability[1] != spaceNeeded; i++) {
+        for (int i = 0; i < 512 && frameAvailability[1] < spaceNeeded; i++) {
                 if (secondaryMemory[i].getProcessID() == -1) {
                     frameAvailability[1]++;
                     secondaryMemoryFrameAvailability.add(i);
@@ -70,7 +71,7 @@ public class EventHandler {
             secondaryMemoryFrameAvailability = freeSpace (spaceNeeded, secondaryMemoryFrameAvailability, 1,
                     secondaryMemoryQueue);
         }
-        for (int i = 0; i < frameAvailability[0]; i++) {
+        for (int i = 0; i < spaceNeeded; i++) {
             report.swapsOut++;
             frameNumber = mainMemoryFrameAvailability.get(i);
             processID = mainMemory[frameNumber].getProcessID();
@@ -90,20 +91,25 @@ public class EventHandler {
         List<Integer> mainMemoryFrameAvailability = new ArrayList<>();
         
         if (isLoaded(p)) {
+            System.out.println("******************************************");
             System.out.println("Este proceso ya está cargado en memoria");
+            System.out.println("******************************************");
             System.out.println();
             return false;
         }
         else {
             //guardar los marcos libres
-            for (int i = 0; i < 256 && frameAvailability[0] != p.getPageNumber(); i++) {
+            for (int i = 0; i < 256 && frameAvailability[0] < p.getPageNumber(); i++) {
                 if (mainMemory[i].getProcessID() == -1) {
                     frameAvailability[0]++;
                     mainMemoryFrameAvailability.add(i);
                 }
             }
             
+            System.out.println("******************************************");
             System.out.println("Se usaron los siguientes marcos de página: ");
+            
+            int tmp = frameAvailability[0];
             
             fitsInMainMemory = (p.getPageNumber() <= frameAvailability[0]);
             
@@ -126,12 +132,13 @@ public class EventHandler {
                 System.out.print(frameNumber + "\t \t");
                 pageNumber++;
                 mainMemoryQueue.add(frameNumber);
-                if (i % 5 == 0) {
+                if ((i+1) % 5 == 0) {
                     System.out.println();
                 }
             }
             
             System.out.println();
+            System.out.println("******************************************");
             
             mainMemoryFrameAvailability.clear();
             System.out.println();
@@ -216,47 +223,67 @@ public class EventHandler {
             int countS = 0;
             
             // Revisa memorias y borra proceso con pID
-            System.out.println("Se liberaron los marcos de memoria principal: ");
+            System.out.println("******************************************");
+            System.out.println("Marcos liberados de memoria principal: ");
             for (int i = 0; i < 256; i++) {
                 if (mainMemory[i].getProcessID() == pID) {
                     countP++;
                     mainMemory[i].setProcessID(-1);
+
+                    // Encontrar y borrar en queue
+                    mainMemoryQueue.remove((Object)i);
+                
                     System.out.print(i + "\t \t");
-                    if (i % 5 == 0) {
+                    if ((i+1) % 5 == 0) {
                         System.out.println();
                     }
                 }
             }
             
             if (countP == 0) {
-                System.out.println("Memoria principal no afectada en liberación");
+                System.out.println("SIN MODIFICACIÓN");
             }
             
-            System.out.println();
+            else {
+                System.out.println();
+            }
             
-            System.out.println("Se liberaron los marcos de memoria secundaria: ");
+            System.out.println("******************************************");
+            System.out.println("Marcos liberados de memoria secundaria: ");
             for (int i = 0; i < 512; i++) {
                 if (secondaryMemory[i].getProcessID() == pID) {
                     countS++;
                     secondaryMemory[i].setProcessID(-1);
+                    
+                    // Encontrar y borrar en queue
+                    secondaryMemoryQueue.remove(i);
+                    
                     System.out.print(i + "\t \t");
-                    if (i % 5 == 0) {
+                    if ((i+1) % 5 == 0) {
                         System.out.println();
                     }
                 }
             }
             
             if (countS == 0) {
-                System.out.println("Memoria secundaria no afectada en liberación");
+                System.out.println("SIN MODIFICACIÓN");
+            }
+            
+            else {
+                System.out.println();
             }
 
-             System.out.println();
+            System.out.println("******************************************");
+            System.out.println();
 
         }
         
         else {
-             System.out.println("*No existe el proceso " + pID + " en memoria");
-             System.out.println();
+            System.out.println("******************************************");
+            System.out.println("No existe el proceso " + pID + " en memoria");
+            System.out.println("******************************************");
+            System.out.println();
+
         }
         report = summary;
     }
@@ -264,23 +291,21 @@ public class EventHandler {
     // Método que muestra los datos del summary después de un conjunto de
     // instrucciones.
     // Recibe la lista de procesos y el resumen.
-    public void end(LinkedList<Process> lklProcess, Summary summary) {
+    public void end(LinkedList<Process> processList, Summary summary) {
         // Revisa los procesos que no terminaron y muestra el error.
-        for (Process process : lklProcess) {
+        System.out.println("******************************************");
+        for (Process process : processList) {
             if (process.getEndTime() == null) {
-                System.out.println("ERROR. El proceso " + process.getId() +
-                        " se quedó cargado en memoria.");
+                System.out.println("Proceso " + process.getId() +
+                        " cargado en memoria.");
+            }
+            
+            else {
+                System.out.println("Turnaround de proceso " + process.getId() +
+                        ": " + process.getTurnaround() + "ms");
             }
         }
-        
-        // Imprime los datos del summary.
-        System.out.println("Fin. REPORTE DE SALIDA");
-        for (Process process : lklProcess) {
-            if (process.getEndTime() != null) {
-                System.out.println("Turnaround del proceso " + process.getId() +
-                        " = " + process.getTurnaround() + "ms");
-            }
-        }
+
         System.out.println("Procesos terminados: " +
                 summary.getTerminatedProcesses());
         System.out.println("Page faults: "+ summary.getPageFaults());
@@ -288,6 +313,8 @@ public class EventHandler {
         System.out.println("Swap outs: "+ summary.getSwapsOut());
         System.out.println("Turnaround promedio: " +
                 summary.getAverageTurnaround());
+        System.out.println("******************************************");
+        System.out.println();
     }
     
     public void access(int address, int pID, boolean bitMod, LinkedList<Process>
@@ -312,9 +339,6 @@ public class EventHandler {
                     pageFoundInSecondaryM = true;
                     //Checar si hay espacio libre en la real
                     //Si si, pasarlo
-                    List<Integer
-                    moveToSecondaryMemory(null, null, 1);
-                    (List<Integer> mainMemoryFrameAvailability, Process p, int spaceNeeded)
                     //Si no, hacer espacio y pasarlo
                 }
             }
