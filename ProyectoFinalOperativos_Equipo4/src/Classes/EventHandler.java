@@ -52,6 +52,7 @@ public class EventHandler {
             frameNumber = tempQueue.poll();
             memoryFrameAvailability.add(frameNumber);
             frameAvailability[type]++;
+            
         }
         return memoryFrameAvailability;
     }
@@ -98,8 +99,14 @@ public class EventHandler {
             System.out.println();
             return false;
         }
+        
+        // Si no existe, llena en memoria
         else {
-            //guardar los marcos libres
+            // Guardar los marcos libres
+            // frameAvailabl¡ility es relativo al page number
+            // Siempre sera igual a page number al principio
+            // Igual mainMemoryFrameAvailability solo tiene los valores de 
+            // i correspondientes a num de pagina al principio
             for (int i = 0; i < 256 && frameAvailability[0] < p.getPageNumber(); i++) {
                 if (mainMemory[i].getProcessID() == -1) {
                     frameAvailability[0]++;
@@ -111,21 +118,31 @@ public class EventHandler {
             System.out.println("Se usaron los siguientes marcos de página: ");
             
             int tmp = frameAvailability[0];
-            
+           
+            // fits es true siempre al principio
+            // si pide mas paginas de las que g¡hay frames, no cabe
             fitsInMainMemory = (p.getPageNumber() <= frameAvailability[0]);
             
+            // No cabe en memoria principal, mover paginas a memoria virtual
+            // Si entra, swap out a memoria virtual
             if (!fitsInMainMemory) {
-                //liberar espacio
+                //libera espacio y mueve paginas necesarias para tener espacio
                 mainMemoryFrameAvailability = freeSpace(p.getPageNumber()-frameAvailability[0], mainMemoryFrameAvailability, 0, 
                         mainMemoryQueue);
-                moveToSecondaryMemory(mainMemoryFrameAvailability, p, p.getPageNumber()-frameAvailability[0]);
+                // no jala no mete nada a la memoria
+                //moveToSecondaryMemory(mainMemoryFrameAvailability, p, p.getPageNumber()-frameAvailability[0]);
+                // pau
+                moveToSecondaryMemory(mainMemoryFrameAvailability, p, p.getPageNumber()-tmp);
             }
-            //solo se carga en memoria
+            
+            //solo se carga en memoria principal si es P
             int frameNumber = 0;
             int pageNumber = 0;
             
+            
             for (int i = 0; i < frameAvailability[0]; i++) {
                 report.swapsIn++;
+                // Frames disponibles
                 frameNumber = mainMemoryFrameAvailability.get(i);
                 mainMemory[frameNumber].setProcessID(p.getId());
                 mainMemory[frameNumber].setPageNumber(pageNumber);
