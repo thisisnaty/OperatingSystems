@@ -81,7 +81,7 @@ public class EventHandler {
         }
     }
     
-    public void load (Process p, Summary r) {
+    public boolean load (Process p, Summary r) {
         report = r;
         boolean fitsInMainMemory = false;
         frameAvailability[0] = 0;
@@ -92,7 +92,7 @@ public class EventHandler {
         if (isLoaded(p)) {
             System.out.println("Este proceso ya está cargado en memoria");
             System.out.println();
-            return;
+            return false;
         }
         else {
             //guardar los marcos libres
@@ -136,6 +136,7 @@ public class EventHandler {
             mainMemoryFrameAvailability.clear();
             System.out.println();
         }
+        return true;
     }
     
     public boolean isLoaded (Process p) {
@@ -307,6 +308,9 @@ public class EventHandler {
                     pageFoundInSecondaryM = true;
                     //Checar si hay espacio libre en la real
                     //Si si, pasarlo
+                    List<Integer
+                    moveToSecondaryMemory(null, null, 1);
+                    (List<Integer> mainMemoryFrameAvailability, Process p, int spaceNeeded)
                     //Si no, hacer espacio y pasarlo
                 }
             }
