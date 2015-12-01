@@ -47,8 +47,27 @@ public class EventHandler {
             secondaryMemory[i] = new Frame();
         }
     }
+<<<<<<< HEAD
 
+    
+    public List<Integer> freeSpace (int spaceNeeded, List<Integer> memoryFrameAvailability, int type, 
+            Queue<Integer> tempQueue) {
+        int frameNumber = 0;
+        for (int i = 0; i < spaceNeeded; i++) {
+            frameNumber = tempQueue.poll();
+            memoryFrameAvailability.add(frameNumber);
+            frameAvailability[type]++;
+            
+        }
+        return memoryFrameAvailability;
+    }
+    
+    public void moveToSecondaryMemory (List<Integer> mainMemoryFrameAvailability, Process p, int spaceNeeded) {
+        List<Integer> secondaryMemoryFrameAvailability = new ArrayList<Integer>();
+        boolean fitsInSecondaryMemory;
+=======
     public void moveToSecondaryMemory (Process p, int spaceToMove) {
+>>>>>>> 31440263656ef12a70aa78b508408a43c5d3e4a0
         int processID, pageNumber, frameNumber;
         if (!hasEnoughSpace(spaceToMove, 1, secondaryMemory)) {
             //si no hay espacio, hace espacio con freeSpace
@@ -57,15 +76,12 @@ public class EventHandler {
                     secondaryMemoryQueue);
         }
         
-        for (int i = 0; i < spaceToMove && 
-                mainMemory[mainMemoryFrameAvailability.peekLast()].getProcessID() != -1; i++) {
-            
+        for (int i = 0; i < spaceToMove; i++) {
             report.swapsOut++;
             frameNumber = mainMemoryFrameAvailability.pollLast();
+            frameNumber = mainMemoryFrameAvailability.get(i);
             processID = mainMemory[frameNumber].getProcessID();
             pageNumber = mainMemory[frameNumber].getPageNumber();
-            
-            frameNumber = secondaryMemoryFrameAvailability.pollFirst();
             secondaryMemory[frameNumber].setProcessID(processID);
             secondaryMemory[frameNumber].setPageNumber(pageNumber);
             secondaryMemoryQueue.add(frameNumber);
@@ -83,6 +99,59 @@ public class EventHandler {
         
         // Si no existe, llena en memoria
         else {
+<<<<<<< HEAD
+            // Guardar los marcos libres
+            // frameAvailabl¡ility es relativo al page number
+            // Siempre sera igual a page number al principio
+            // Igual mainMemoryFrameAvailability solo tiene los valores de 
+            // i correspondientes a num de pagina al principio
+            for (int i = 0; i < 256 && frameAvailability[0] < p.getPageNumber(); i++) {
+                if (mainMemory[i].getProcessID() == -1) {
+                    frameAvailability[0]++;
+                    mainMemoryFrameAvailability.add(i);
+                }
+            }
+            
+            System.out.println("******************************************");
+            System.out.println("Se usaron los siguientes marcos de página: ");
+            
+            int tmp = frameAvailability[0];
+           
+            // fits es true siempre al principio
+            // si pide mas paginas de las que g¡hay frames, no cabe
+            fitsInMainMemory = (p.getPageNumber() <= frameAvailability[0]);
+            
+            // No cabe en memoria principal, mover paginas a memoria virtual
+            // Si entra, swap out a memoria virtual
+            if (!fitsInMainMemory) {
+                //libera espacio y mueve paginas necesarias para tener espacio
+                mainMemoryFrameAvailability = freeSpace(p.getPageNumber()-frameAvailability[0], mainMemoryFrameAvailability, 0, 
+                        mainMemoryQueue);
+                // no jala no mete nada a la memoria
+                //moveToSecondaryMemory(mainMemoryFrameAvailability, p, p.getPageNumber()-frameAvailability[0]);
+                // pau
+                moveToSecondaryMemory(mainMemoryFrameAvailability, p, p.getPageNumber()-tmp);
+            }
+            
+            //solo se carga en memoria principal si es P
+            int frameNumber = 0;
+            int pageNumber = 0;
+            
+            
+            for (int i = 0; i < frameAvailability[0]; i++) {
+                report.swapsIn++;
+                // Frames disponibles
+                frameNumber = mainMemoryFrameAvailability.get(i);
+                mainMemory[frameNumber].setProcessID(p.getId());
+                mainMemory[frameNumber].setPageNumber(pageNumber);
+                
+                System.out.print(frameNumber + "\t \t");
+                pageNumber++;
+                mainMemoryQueue.add(frameNumber);
+                if ((i+1) % 5 == 0) {
+                    System.out.println();
+                }
+=======
             max = 512;
         }
         for (int i = 0; i < max && frameAvailability[type] != spaceNeeded; i++) {
@@ -115,6 +184,7 @@ public class EventHandler {
             else {
                 System.out.println("Turnaround de proceso " + process.getId() +
                         ": " + process.getTurnaround() + "ms");
+>>>>>>> 31440263656ef12a70aa78b508408a43c5d3e4a0
             }
         }
         
