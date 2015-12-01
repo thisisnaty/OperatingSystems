@@ -25,12 +25,12 @@ public class EventHandler {
     // libres en memoria secundaria
     private Integer[] frameAvailability;
     private Summary report;
-    private List<Integer> mainMemoryFrameAvailability;
-    private List<Integer> secondaryMemoryFrameAvailability;
+    private LinkedList<Integer> mainMemoryFrameAvailability;
+    private LinkedList<Integer> secondaryMemoryFrameAvailability;
     
     public EventHandler() {
-        secondaryMemoryFrameAvailability = new ArrayList<Integer>();
-        mainMemoryFrameAvailability = new ArrayList<Integer>();
+        secondaryMemoryFrameAvailability = new LinkedList<Integer>();
+        mainMemoryFrameAvailability = new LinkedList<Integer>();
         mainMemory = new Frame[256];
         secondaryMemory = new Frame[512];
         mainMemoryQueue = new LinkedList<Integer>();
@@ -47,16 +47,18 @@ public class EventHandler {
             secondaryMemory[i] = new Frame();
         }
     }
-    public void moveToSecondaryMemory (List<Integer> mainMemoryFrameAvailability, Process p,
-            int spaceNeeded) {
+    public void moveToSecondaryMemory (Process p, int spaceToMove) {
         int processID, pageNumber, frameNumber;
-        if (!hasEnoughSpace(spaceNeeded, 1, secondaryMemoryFrameAvailability, secondaryMemory)) {
-            secondaryMemoryFrameAvailability = freeSpace (spaceNeeded,
+        if (!hasEnoughSpace(spaceToMove, 1, secondaryMemory)) {
+            //si no hay espacio, hace espacio con freeSpace
+            secondaryMemoryFrameAvailability = freeSpace (spaceToMove,
                     secondaryMemoryFrameAvailability, 1,
                     secondaryMemoryQueue);
         }
-        for (int i = 0; i < spaceNeeded; i++) {
+        
+        for (int i = 0; i < spaceToMove; i++) {
             report.swapsOut++;
+            frameNumber = mainMemoryFrameAvailability.pollLast();
             frameNumber = mainMemoryFrameAvailability.get(i);
             processID = mainMemory[frameNumber].getProcessID();
             pageNumber = mainMemory[frameNumber].getPageNumber();
@@ -64,6 +66,33 @@ public class EventHandler {
             secondaryMemory[frameNumber].setPageNumber(pageNumber);
             secondaryMemoryQueue.add(frameNumber);
         }
+    }
+    
+    //sobreescribe main memories availability
+    public boolean hasEnoughSpace (int spaceNeeded, int type,
+            Frame[] frameArray) {
+        LinkedList<Integer> memoryFrameAvailability = new LinkedList<Integer>();
+        int max;
+        if (type == 0) {
+            max = 256;
+        }
+        else {
+            max = 512;
+        }
+        for (int i = 0; i < max && frameAvailability[type] != spaceNeeded; i++) {
+            if (frameArray[i].getProcessID() == -1) {
+                frameAvailability[type]++;
+                memoryFrameAvailability.add(i);
+            }
+        }
+        
+        if (type == 0) {
+            mainMemoryFrameAvailability = memoryFrameAvailability;
+        }
+        else {
+            secondaryMemoryFrameAvailability = memoryFrameAvailability;
+        }
+        return (frameAvailability[type] >= spaceNeeded);
     }
     // Método que muestra los datos del summary después de un conjunto de
     // instrucciones.
@@ -119,7 +148,7 @@ public class EventHandler {
                 if(secondaryMemory[i].getProcessID() == pID && secondaryMemory[i].getPageNumber() == pageNumber){
                     pageFoundInSecondaryM = true;
                     //Checar si hay espacio libre en la real
-                    if (hasEnoughSpace(1, 0, mainMemoryFrameAvailability, mainMemory)) {
+                    if (hasEnoughSpace(1, 0, mainMemory)) {
                         //Si si, pasarlo
                         List<Integer> tmp = new ArrayList<Integer>();
                         tmp.add(i);
@@ -267,13 +296,19 @@ public class EventHandler {
         
         return false;
     }
-    public List<Integer> freeSpace (int spaceNeeded, List<Integer> memoryFrameAvailability, int type,
+    public LinkedList<Integer> freeSpace (int spaceNeeded, LinkedList<Integer> memoryFrameAvailability, int type,
             Queue<Integer> tempQueue) {
         int frameNumber = 0;
         for (int i = 0; i < spaceNeeded; i++) {
             frameNumber = tempQueue.poll();
             memoryFrameAvailability.add(frameNumber);
             frameAvailability[type]++;
+        }
+        if (type == 0) {
+            mainMemoryFrameAvailability = memoryFrameAvailability;
+        }
+        else {
+            secondaryMemoryFrameAvailability = memoryFrameAvailability;
         }
         return memoryFrameAvailability;
     }
@@ -298,25 +333,18 @@ public class EventHandler {
             return false;
         }
         else {
-            //guardar los marcos libres
-            for (int i = 0; i < 256 && frameAvailability[0] < p.getPageNumber(); i++) {
-                if (mainMemory[i].getProcessID() == -1) {
-                    frameAvailability[0]++;
-                    mainMemoryFrameAvailability.add(i);
-                }
-            }
+            
             
             System.out.println("******************************************");
             System.out.println("Se usaron los siguientes marcos de página: ");
             
             int tmp = frameAvailability[0];
             
-            if (!hasEnoughSpace (p.getPageNumber(), 0, mainMemoryFrameAvailability,
-                    mainMemory)) {
+            if (!hasEnoughSpace (p.getPageNumber(), 0, mainMemory)) {
                 //liberar espacio
                 mainMemoryFrameAvailability = freeSpace(p.getPageNumber()-frameAvailability[0],
                         mainMemoryFrameAvailability, 0, mainMemoryQueue);
-                moveToSecondaryMemory(mainMemoryFrameAvailability, p, p.getPageNumber()-frameAvailability[0]);
+                moveToSecondaryMemory(p, p.getPageNumber()-frameAvailability[0]);
             }
             
             //solo se carga en memoria
@@ -344,24 +372,5 @@ public class EventHandler {
             System.out.println();
         }
         return true;
-    }
-    
-    
-    public boolean hasEnoughSpace (int spaceNeeded, int type, List<Integer> memoryFrameAvailability,
-            Frame[] frameArray) {
-        int max;
-        if (type == 0) {
-            max = 256;
-        }
-        else {
-            max = 512;
-        }
-        for (int i = 0; i < max && frameAvailability[type] != spaceNeeded; i++) {
-            if (frameArray[i].getProcessID() == -1) {
-                frameAvailability[type]++;
-                memoryFrameAvailability.add(i);
-            }
-        }
-        return (frameAvailability[type] >= spaceNeeded);
     }
 }
