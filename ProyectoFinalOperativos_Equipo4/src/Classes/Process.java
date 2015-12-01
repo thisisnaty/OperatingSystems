@@ -22,6 +22,7 @@ public class Process {
     private Calendar arrivalTime;     // Tiempo de llegada del proceso.
     private long turnaround;    // Tiempo de turnaround del proceso.
     private Calendar endTime; // Tiempo de terminación del proceso.
+    private boolean end;
     
     public Process(int id, int size) {
         this.id = id;
@@ -37,6 +38,7 @@ public class Process {
         this.arrivalTime.getTime();
         this.turnaround = 0;
         this.endTime = null;
+        this.end = false;
         
     }
     
@@ -62,6 +64,14 @@ public class Process {
         return pageNumber;
     }
     
+    public boolean getEnd() {
+        return end;
+    }
+    
+    public void setEnd(boolean value) {
+        this.end = value;
+    }
+    
     public int getSize() {
         return size;
     }
@@ -81,6 +91,7 @@ public class Process {
     
     public void setEndTime(Calendar endTime) {
         this.endTime = endTime;
+        this.end = true;
     }         
     
 }

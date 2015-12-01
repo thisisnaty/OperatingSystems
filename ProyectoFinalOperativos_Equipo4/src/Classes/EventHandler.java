@@ -168,12 +168,11 @@ public class EventHandler {
     // El método calcula el turnaround y muestra los marcos liberados.
     public void removeProcess(int pID, Summary summary,
             LinkedList<Process> processList) {
-        System.out.println("Liberar");
         boolean exists = false;     // Variable que guarda si el proceso existe.
         
         // Checa que el proceso exista
         for (Process process : processList) {
-            if (process.getId() == pID && process.getTurnaround() == 0) {
+            if (process.getId() == pID && !process.getEnd()) {
                 exists = true;
             }
         }
@@ -210,6 +209,7 @@ public class EventHandler {
             summary.updateTerminatedProcesses();
             summary.updateTotalTurnaround(turnaround);
             processList.get(processIndex).getTurnaround();
+            processList.get(processIndex).setEnd(true);
             
             int countP = 0;
             int countS = 0;
@@ -248,9 +248,13 @@ public class EventHandler {
             if (countS == 0) {
                 System.out.println("Memoria secundaria no afectada en liberación");
             }
-            
+
              System.out.println();
-             System.out.println("*Que ocupaba el proceso " + pID);
+
+        }
+        
+        else {
+             System.out.println("*No existe el proceso " + pID + " en memoria");
              System.out.println();
         }
         report = summary;
