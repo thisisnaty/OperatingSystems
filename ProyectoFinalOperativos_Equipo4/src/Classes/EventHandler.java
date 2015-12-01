@@ -56,12 +56,15 @@ public class EventHandler {
                     secondaryMemoryQueue);
         }
         
-        for (int i = 0; i < spaceToMove; i++) {
+        for (int i = 0; i < spaceToMove && 
+                mainMemory[mainMemoryFrameAvailability.peekLast()].getProcessID() != -1; i++) {
+            
             report.swapsOut++;
             frameNumber = mainMemoryFrameAvailability.pollLast();
-            frameNumber = mainMemoryFrameAvailability.get(i);
             processID = mainMemory[frameNumber].getProcessID();
             pageNumber = mainMemory[frameNumber].getPageNumber();
+            
+            frameNumber = secondaryMemoryFrameAvailability.pollFirst();
             secondaryMemory[frameNumber].setProcessID(processID);
             secondaryMemory[frameNumber].setPageNumber(pageNumber);
             secondaryMemoryQueue.add(frameNumber);
