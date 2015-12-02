@@ -104,7 +104,7 @@ public class EventHandler {
             secondaryMemory[SM_frame].setProcessID(MM_processID);
             
             mainMemoryQueue.push(MM_frame);
-            secondaryMemoryQueue.push(SM_frame); //buscar y sacar este frame??
+            //secondaryMemoryQueue.push(SM_frame); //buscar y sacar este frame??
             
             report.swapsOut++;
         }
@@ -195,6 +195,8 @@ public class EventHandler {
     public boolean access(int address, int pID, boolean bitMod, LinkedList<Process>
             processList, Summary summary) {
         int pageNumber = address/8;
+        frameAvailability[0] = 0;
+        frameAvailability[1] = 0;
         
         //innecesario, o cambiar a que regrese index y su tipo de memoria
         if (!isLoaded(pID)) {

@@ -106,8 +106,8 @@ public class Controller {
                             if(validateA(line)) {
                                 System.out.println("Instrucción a procesar:");
                                 System.out.println(line);
-                                System.out.println();
-                                //createA();
+                                createA();
+                                System.out.println();                                
                             }
                             break;
                             
@@ -230,7 +230,7 @@ public class Controller {
     // Crear nuevo evento de accesar datos
     private void createA() {
         // Accesar proceso
-        // handler.access(address, pID, bitMod, processList, summary);
+        handler.access(address, pID, bitMod, processList, summary);
     }
     
     // Validar file input de A
