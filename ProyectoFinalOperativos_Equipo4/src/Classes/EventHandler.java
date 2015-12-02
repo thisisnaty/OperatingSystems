@@ -47,7 +47,7 @@ public class EventHandler {
             secondaryMemory[i] = new Frame();
         }
     }
-
+    
     public void moveToSecondaryMemory (Process p, int spaceToMove) {
         int processID, pageNumber, frameNumber;
         if (!hasEnoughSpace(spaceToMove, 1, secondaryMemory)) {
@@ -57,7 +57,7 @@ public class EventHandler {
                     secondaryMemoryQueue);
         }
         
-        for (int i = 0; i < spaceToMove && 
+        for (int i = 0; i < spaceToMove &&
                 mainMemory[mainMemoryFrameAvailability.peekLast()].getProcessID() != -1; i++) {
             
             report.swapsOut++;
@@ -77,13 +77,13 @@ public class EventHandler {
     
     /**
      * Mueve una pagina de memoria secundaria a principal
-     * 
+     *
      * @param SM_pageNumber Es el numero de pagina del proceso
      * @param SM_processID Es el id del proceso
      * @param SM_frame Es el frame de memoria secundaria donde está la pagina
      */
     public void movePageToPrimaryMemory(int SM_pageNumber, int SM_processID, int SM_frame){
-        //checa que haya un marco libre en memoria principal, 
+        //checa que haya un marco libre en memoria principal,
         //se actualiza la lista de libres en principal
         boolean fitsInMM = hasEnoughSpace(1, 0, mainMemory);
         int MM_pageNumber, MM_processID, MM_frame;
@@ -103,6 +103,17 @@ public class EventHandler {
             secondaryMemory[SM_frame].setPageNumber(MM_pageNumber);
             secondaryMemory[SM_frame].setProcessID(MM_processID);
             
+            //Se movio a que frame de memoria principal?
+            System.out.println("Página " + MM_pageNumber + " del proceso "
+                    + MM_processID + " transferida a memoria secundaria");
+            System.out.println("Dirección virtual asignada: " + (SM_frame%8 + SM_frame*8));
+            
+            
+            //Se movio a que frame de memoria principal?
+            System.out.println("Página " + SM_pageNumber + " del proceso "
+                    + SM_processID + " transferida a memoria principal");
+            System.out.println("Dirección real: " + (MM_frame%8 + MM_frame*8));
+            
             mainMemoryQueue.push(MM_frame);
             //secondaryMemoryQueue.push(SM_frame); //buscar y sacar este frame??
             
@@ -115,6 +126,11 @@ public class EventHandler {
             //actualizo los valores por los de la memoria secundaria
             mainMemory[MM_frame].setPageNumber(SM_pageNumber);
             mainMemory[MM_frame].setProcessID(SM_processID);
+            
+            //Se movio a que frame de memoria principal?
+            System.out.println("Página " + SM_pageNumber + " del proceso "
+                    + SM_processID + " transferida a memoria principal");
+            System.out.println("Dirección real: " + (MM_frame%8 + MM_frame*8));
             
             //se borran datos de pagina del marco en la memoria secundaria
             secondaryMemory[SM_frame].setPageNumber(0);
@@ -200,6 +216,11 @@ public class EventHandler {
         
         //innecesario, o cambiar a que regrese index y su tipo de memoria
         if (!isLoaded(pID)) {
+            //erorr no esta cargado
+            System.out.println("******************************************");
+            System.out.println("La página no está cargada en memoria");
+            System.out.println("******************************************");
+            System.out.println();
             return false;
         }
         
@@ -209,10 +230,9 @@ public class EventHandler {
         System.out.println("******************************************");
         //checar si esta cargada en memoria principal
         for(int i = 0; i < 256; i++){
-            if(mainMemory[i].getProcessID() == pID && 
+            if(mainMemory[i].getProcessID() == pID &&
                     mainMemory[i].getPageNumber() == pageNumber){
-                System.out.println("Dirección virtual: " + address);
-                System.out.println("Dirección real: " + pageNumber + i*8);
+                System.out.println("Dirección real: " + (address%8 + i*8));
                 System.out.println("******************************************");
                 //pageFound = true;
                 return true;
@@ -223,14 +243,13 @@ public class EventHandler {
         if(!pageFound){
             for(int i = 0; i < 512; i++){
                 //lo encuentra
-                if(secondaryMemory[i].getProcessID() == pID && 
+                if(secondaryMemory[i].getProcessID() == pID &&
                         secondaryMemory[i].getPageNumber() == pageNumber){
+                    System.out.println("Dirección virtual: " + (address%8 + i*8));
                     
                     //pasa de secundaria a principal
                     movePageToPrimaryMemory(pageNumber, pID, i);
                     
-                    System.out.println("Dirección virtual: " + address);
-                    System.out.println("Dirección real: " + pageNumber + i*8);
                     System.out.println("******************************************");
                     //pageFoundInSecondaryM = true;
                     return true;
@@ -239,7 +258,10 @@ public class EventHandler {
         }
         
         if(!pageFoundInSecondaryM){
-            System.out.println("La página " + pageNumber + " no está cargada");
+            System.out.println("******************************************");
+            System.out.println("La página no está cargada en memoria");
+            System.out.println("******************************************");
+            System.out.println();
         }
         return false;
     }
@@ -420,7 +442,7 @@ public class EventHandler {
             
             System.out.println("******************************************");
             System.out.println("Se usaron los siguientes marcos de página: ");
-
+            
             if (!hasEnoughSpace (p.getPageNumber(), 0, mainMemory)) {
                 int tmp = frameAvailability[0];
                 //liberar espacio
@@ -433,7 +455,6 @@ public class EventHandler {
             int frameNumber = 0;
             int pageNumber = 0;
             for (int i = 0; i < frameAvailability[0]; i++) {
-                report.swapsIn++;
                 frameNumber = mainMemoryFrameAvailability.get(i);
                 mainMemory[frameNumber].setProcessID(p.getId());
                 mainMemory[frameNumber].setPageNumber(pageNumber);
