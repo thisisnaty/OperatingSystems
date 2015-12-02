@@ -75,19 +75,77 @@ public class EventHandler {
         }
     }
     
+    /**
+     * Mueve una pagina de memoria secundaria a principal
+     * 
+     * @param SM_pageNumber Es el numero de pagina del proceso
+     * @param SM_processID Es el id del proceso
+     * @param SM_frame Es el frame de memoria secundaria donde está la pagina
+     */
+    public void movePageToPrimaryMemory(int SM_pageNumber, int SM_processID, int SM_frame){
+        //checa que haya un marco libre en memoria principal, 
+        //se actualiza la lista de libres en principal
+        boolean fitsInMM = hasEnoughSpace(1, 0, mainMemory);
+        int MM_pageNumber, MM_processID, MM_frame;
+        
+        //si no hay espacio, hacer swaps
+        if(!fitsInMM){
+            //guardo los valores de la pagina actualmente en memoria principal
+            MM_frame = mainMemoryQueue.poll();
+            MM_pageNumber = mainMemory[MM_frame].getPageNumber();
+            MM_processID = mainMemory[MM_frame].getProcessID();
+            
+            //actualizo los valores por los de la memoria secundaria
+            mainMemory[MM_frame].setPageNumber(SM_pageNumber);
+            mainMemory[MM_frame].setProcessID(SM_processID);
+            
+            //actualizo valores por los de la memoria principal
+            secondaryMemory[SM_frame].setPageNumber(MM_pageNumber);
+            secondaryMemory[SM_frame].setProcessID(MM_processID);
+            
+            mainMemoryQueue.push(MM_frame);
+            //secondaryMemoryQueue.push(SM_frame); //buscar y sacar este frame??
+            
+            report.swapsOut++;
+        }
+        //si hay espacio, solo mover a principal
+        else{
+            MM_frame = mainMemoryFrameAvailability.peek();
+            
+            //actualizo los valores por los de la memoria secundaria
+            mainMemory[MM_frame].setPageNumber(SM_pageNumber);
+            mainMemory[MM_frame].setProcessID(SM_processID);
+            
+            //se borran datos de pagina del marco en la memoria secundaria
+            secondaryMemory[SM_frame].setPageNumber(0);
+            secondaryMemory[SM_frame].setProcessID(-1);
+            
+            mainMemoryQueue.push(MM_frame);
+            
+            //quitar secondary de queue?
+        }
+        
+        report.swapsIn++;
+    }
+    
     //sobreescribe main memories availability
+    //type = 0 para principal
+    //type = 1 para secundaria
     public boolean hasEnoughSpace (int spaceNeeded, int type,
             Frame[] frameArray) {
         LinkedList<Integer> memoryFrameAvailability = new LinkedList<Integer>();
         int max;
+        
+        //tipo = 0 para principal
         if (type == 0) {
             max = 256;
         }
-        
-        // Si no existe, llena en memoria
+        //tipo = 1 para secundaria
         else {
             max = 512;
         }
+        
+        //itera hasta pasarse de marcos o llenar la demanda de libres
         for (int i = 0; i < max && frameAvailability[type] != spaceNeeded; i++) {
             if (frameArray[i].getProcessID() == -1) {
                 frameAvailability[type]++;
@@ -95,6 +153,7 @@ public class EventHandler {
             }
         }
         
+        //copia los libres a la lista correspondiente
         if (type == 0) {
             mainMemoryFrameAvailability = memoryFrameAvailability;
         }
@@ -103,6 +162,7 @@ public class EventHandler {
         }
         return (frameAvailability[type] >= spaceNeeded);
     }
+    
     // Método que muestra los datos del summary después de un conjunto de
     // instrucciones.
     // Recibe la lista de procesos y el resumen.
@@ -135,42 +195,53 @@ public class EventHandler {
     public boolean access(int address, int pID, boolean bitMod, LinkedList<Process>
             processList, Summary summary) {
         int pageNumber = address/8;
+        frameAvailability[0] = 0;
+        frameAvailability[1] = 0;
         
+        //innecesario, o cambiar a que regrese index y su tipo de memoria
         if (!isLoaded(pID)) {
             return false;
         }
+        
         boolean pageFound = false;
-        boolean pageFoundInSecondaryM;
-        //checar si esta cargada en mi memoria
-        //pID && pageNumber en algun marco de memoria REAL
+        boolean pageFoundInSecondaryM = false;
+        
+        //checar si esta cargada en memoria principal
         for(int i = 0; i < 256; i++){
-            if(mainMemory[i].getProcessID() == pID && mainMemory[i].getPageNumber() == pageNumber){
-                System.out.println("Direccion virtual: " + address);
-                System.out.println("Direccion real: " + pageNumber + i*8);
-                pageFound = true;
+            if(mainMemory[i].getProcessID() == pID && 
+                    mainMemory[i].getPageNumber() == pageNumber){
+                System.out.println("Dirección virtual: " + address);
+                System.out.println("Dirección real: " + pageNumber + i*8);
+                //pageFound = true;
+                return true;
             }
         }
         
         //si no lo encuentra, buscar en memoria secundaria
         if(!pageFound){
             for(int i = 0; i < 512; i++){
-                if(secondaryMemory[i].getProcessID() == pID && secondaryMemory[i].getPageNumber() == pageNumber){
-                    pageFoundInSecondaryM = true;
-                    //Checar si hay espacio libre en la real
-                    if (hasEnoughSpace(1, 0, mainMemory)) {
-                        //Si si, pasarlo
-                        List<Integer> tmp = new ArrayList<Integer>();
-                        tmp.add(i);
-                        
-                    }
+                //lo encuentra
+                if(secondaryMemory[i].getProcessID() == pID && 
+                        secondaryMemory[i].getPageNumber() == pageNumber){
                     
-                    //Si si, pasarlo
-                    //Si no, hacer espacio y pasarlo
+                    //pasa de secundaria a principal
+                    movePageToPrimaryMemory(pageNumber, pID, i);
+                    
+                    System.out.println("Dirección virtual: " + address);
+                    System.out.println("Dirección real: " + pageNumber + i*8);
+                    
+                    //pageFoundInSecondaryM = true;
+                    return true;
                 }
             }
         }
-        return true;
+        
+        if(!pageFoundInSecondaryM){
+            System.out.println("La página " + pageNumber + " no está cargada");
+        }
+        return false;
     }
+    
     // Método removeProcess que libera un proceso de memoria.
     // Recibe de parámetros el processId, el summary y la lista de procesos.
     // El método calcula el turnaround y muestra los marcos liberados.
@@ -305,6 +376,7 @@ public class EventHandler {
         
         return false;
     }
+    
     public void freeSpace (int spaceNeeded, LinkedList<Integer> memoryFrameAvailability, int type,
             Queue<Integer> tempQueue) {
         int frameNumber = 0;
@@ -320,6 +392,7 @@ public class EventHandler {
             secondaryMemoryFrameAvailability = memoryFrameAvailability;
         }
     }
+    
     public boolean load (Process p, Summary r) {
         report = r;
         boolean fitsInMainMemory = false;
