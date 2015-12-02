@@ -62,8 +62,11 @@ public class EventHandler {
             
             report.swapsOut++;
             frameNumber = mainMemoryFrameAvailability.pollLast();
+            mainMemoryFrameAvailability.addFirst(frameNumber);
+            
             processID = mainMemory[frameNumber].getProcessID();
             pageNumber = mainMemory[frameNumber].getPageNumber();
+            mainMemory[frameNumber].setProcessID(-1);
             
             frameNumber = secondaryMemoryFrameAvailability.pollFirst();
             secondaryMemory[frameNumber].setProcessID(processID);
@@ -253,7 +256,7 @@ public class EventHandler {
                     secondaryMemory[i].setProcessID(-1);
                     
                     // Encontrar y borrar en queue
-                    secondaryMemoryQueue.remove(i);
+                    secondaryMemoryQueue.remove((Object)i);
                     
                     System.out.print(i + "\t \t");
                     if ((i+1) % 5 == 0) {
