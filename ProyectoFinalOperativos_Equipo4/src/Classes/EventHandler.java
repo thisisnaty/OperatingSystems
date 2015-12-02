@@ -205,13 +205,15 @@ public class EventHandler {
         
         boolean pageFound = false;
         boolean pageFoundInSecondaryM = false;
-        
+        System.out.println();
+        System.out.println("******************************************");
         //checar si esta cargada en memoria principal
         for(int i = 0; i < 256; i++){
             if(mainMemory[i].getProcessID() == pID && 
                     mainMemory[i].getPageNumber() == pageNumber){
                 System.out.println("Dirección virtual: " + address);
                 System.out.println("Dirección real: " + pageNumber + i*8);
+                System.out.println("******************************************");
                 //pageFound = true;
                 return true;
             }
@@ -229,7 +231,7 @@ public class EventHandler {
                     
                     System.out.println("Dirección virtual: " + address);
                     System.out.println("Dirección real: " + pageNumber + i*8);
-                    
+                    System.out.println("******************************************");
                     //pageFoundInSecondaryM = true;
                     return true;
                 }
